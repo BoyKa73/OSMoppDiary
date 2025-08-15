@@ -1,0 +1,59 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+    <meta charset="UTF-8">
+    <title>Exportieren</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+</head>
+<body class="container py-4">
+    <h2 class="mb-4">Exportiere deine Einträge und Events</h2>
+    <form method="POST" action="{{ url_for('export_pdf') }}">
+        <div class="mb-4">
+            <h4>Deine Tagebucheinträge</h4>
+            {% with messages = get_flashed_messages(with_categories=true) %}
+              {% if messages %}
+                {% for category, message in messages %}
+                  <div class="alert alert-{{ category }} alert-dismissible fade show" role="alert">
+                    {{ message }}
+                    <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+                  </div>
+                {% endfor %}
+              {% endif %}
+            {% endwith %}
+            <ul class="list-group">
+                {% for task in tasks %}
+                <li class="list-group-item d-flex align-items-center">
+                    <input class="form-check-input me-2" type="checkbox" name="export_entries" value="{{ task.id }}" id="task{{ task.id }}" checked="true">
+                    <label class="form-check-label flex-grow-1" for="task{{ task.id }}">
+                        <strong>{{ task.occurred_on.strftime('%d.%m.%Y') }}</strong>:
+                        {{ task.content|truncate(60) }}
+                        {% if task.category %}<span class="badge bg-secondary ms-2">{{ task.category }}</span>{% endif %}
+                        {% if task.mood %}<span class="badge bg-info ms-2">{{ task.mood }}</span>{% endif %}
+                    </label>
+                </li>
+                {% else %}
+                <li class="list-group-item">Keine Einträge gefunden.</li>
+                {% endfor %}
+            </ul>
+        </div>
+        <div class="mb-4">
+            <h4>Deine Static Events</h4>
+            <ul class="list-group">
+                {% for event in static_events %}
+                <li class="list-group-item d-flex align-items-center">
+                    <input class="form-check-input me-2" type="checkbox" name="export_entries" value="static_{{ event.id }}" id="event{{ event.id }}">
+                    <label class="form-check-label flex-grow-1" for="event{{ event.id }}">
+                        <strong>{{ event.start_date.strftime('%d.%m.%Y') }}</strong> - <strong>{{ event.end_date.strftime('%d.%m.%Y') }}</strong>:
+                        {{ event.title }}
+                        {% if event.color %}<span class="badge" style="background-color:{{ event.color }};">&nbsp;</span>{% endif %}
+                    </label>
+                </li>
+                {% else %}
+                <li class="list-group-item">Keine Static Events gefunden.</li>
+                {% endfor %}
+            </ul>
+        </div>
+        <button type="submit" class="btn btn-primary">Export als PDF</button>
+    </form>
+</body>
+</html>

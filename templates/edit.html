@@ -1,0 +1,134 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+  <meta charset="UTF-8">
+  <title>Bearbeiten – MoppDiary</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <link rel="icon" href="{{ url_for('static', filename='favicon.png') }}">
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+  <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Caveat:wght@400..700&display=swap" rel="stylesheet">
+</head>
+<body class="container mt-5" style="font-family: 'Caveat', cursive, Arial, sans-serif;">
+  <div class="main-box p-4" style="background: rgba(255,255,255,0.15); border-radius: 18px; box-shadow: 0 2px 8px rgba(102,102,153,0.08); padding: 2rem 1rem; border-radius:30px; max-width: 900px; margin: 0 auto;">
+    <h1 class="mb-4 text-center" style="color: #333333; font-size: 2.5rem; font-weight: bold;">
+      <img src="{{ url_for('static', filename='journal_diary_905 (1).png') }}" alt="MoppDiary" style="height: 40px; width: auto; margin-right: 10px;" onerror="this.style.display='none';">
+      ✏️ Eintrag bearbeiten
+    </h1>
+
+    <div class="card shadow-sm hover-card" style="border-radius: 16px; overflow: hidden; background: #f8f9fa;">
+      <div class="card-body">
+        <form method="POST" enctype="multipart/form-data">
+    {% if task.__class__.__name__ == 'Task' %}
+      <label class="form-label">Titel</label>
+      <input type="text" name="title" class="form-control mb-3" value="{{ task.title }}" required maxlength="200">
+
+      <label class="form-label">Inhalt</label>
+      <textarea name="content" class="form-control mb-3" rows="3" maxlength="1800">{{ task.content }}</textarea>
+
+      <div class="row mb-3">
+        <div class="col-md-6">
+          <label class="form-label">Startdatum & Zeit</label>
+          <input type="datetime-local" name="start_date" class="form-control" value="{{ task.start_date.strftime('%Y-%m-%dT%H:%M') if task.start_date else '' }}">
+        </div>
+        <div class="col-md-6">
+          <label class="form-label">Enddatum & Zeit</label>
+          <input type="datetime-local" name="end_date" class="form-control" value="{{ task.end_date.strftime('%Y-%m-%dT%H:%M') if task.end_date else '' }}">
+        </div>
+      </div>
+
+      <label class="form-label">Farbe <span data-bs-toggle="tooltip" title="In dieser Farbe wird der Eintrag im Kalender angezeigt">🛈</span></label>
+      <input type="color" name="color" class="form-control form-control-color mb-3" value="{{ task.color if task.color else '#4735e7' }}" title="In dieser Farbe wird der Eintrag im Kalender angezeigt">
+
+      <label class="form-label">Kategorie</label>
+      <select name="category" class="form-select mb-3">
+        {% set categories = [
+          'Alltag', 'Zwischenmenschlich', 'Reflexion', 'Konflikt', 'Privat', 'Beruflich', 'Urlaub', 'Gesundheit',
+          'Finanzen', 'Reisen', 'Hobbys', 'Familie', 'Freunde', 'Beziehungen', 'Selbstentwicklung', 'Spiritualität',
+          'Gesellschaft', 'Politik', 'Kreativität', 'Schule/Bildung', 'Technologie', 'Umwelt', 'Ereignis', 'Ernährung',
+          'Sport', 'Kunst', 'Musik', 'Literatur', 'Film', 'Spiele', 'Natur', 'Wissenschaft', 'Philosophie', 'Geschichte',
+          'Kultur', 'Recht', 'Soziales', 'Ethische Fragen', 'Sonstiges', 'Mentale Gesundheit'
+        ] %}
+        {% for cat in categories %}
+          <option value="{{ cat }}" {% if task.category == cat %}selected{% endif %}>{{ cat }}</option>
+        {% endfor %}
+      </select>
+
+      <label class="form-label">Stimmung</label>
+      <select name="mood" class="form-select mb-3">
+        {% set moods = [
+          'Neutral', 'Fröhlich', 'Traurig', 'Wütend', 'Depressiv', 'Müde', 'Träge', 'Ausgelassen', 'Zynisch', 'Einsam',
+          'Allein', 'Liebeskummer', 'Verliebt', 'Beobachtet', 'Überfordert', 'Entspannt', 'Angst', 'Schüchtern',
+          'Verfolgt', 'Überrascht', 'Erschöpft', 'Euphorisch', 'Verwirrt', 'Erleichtert', 'Schuldig', 'Schockiert',
+          'Enttäuscht', 'Erstaunt', 'Angespannt', 'Gelassen', 'Aufgeregt', 'Kummer', 'Überwältigt', 'Satt', 'Hungrig',
+          'Durstig', 'Erfrischt', 'Erfüllt', 'Unmotiviert'
+        ] %}
+        {% for mood in moods %}
+          <option value="{{ mood }}" {% if task.mood == mood %}selected{% endif %}>{{ mood }}</option>
+        {% endfor %}
+      </select>
+
+      <label class="form-label">Beteiligte Personen</label>
+      <input type="text" name="people" class="form-control mb-3" value="{{ task.people }}" maxlength="100">
+
+      <label class="form-label">📎 Neue Dateien hinzufügen</label>
+      <input type="file" name="attachments" multiple class="form-control mb-3" accept=".jpg,.jpeg,.png,.gif,.pdf,.txt">
+
+      <div class="form-text mb-4">Du kannst mehrere neue Dateien hinzufügen. Vorhandene Anhänge werden unten angezeigt.</div>
+
+    {% elif task.__class__.__name__ == 'StaticEvent' %}
+      <label class="form-label">Titel</label>
+      <input type="text" name="title" class="form-control mb-3" value="{{ task.title }}" required>
+
+      <div class="row mb-3">
+        <div class="col-md-6">
+          <label class="form-label">Startdatum & Zeit</label>
+          <input type="datetime-local" name="start_date" class="form-control" value="{{ task.start_date.strftime('%Y-%m-%dT%H:%M') if task.start_date else '' }}">
+        </div>
+        <div class="col-md-6">
+          <label class="form-label">Enddatum & Zeit</label>
+          <input type="datetime-local" name="end_date" class="form-control" value="{{ task.end_date.strftime('%Y-%m-%dT%H:%M') if task.end_date else '' }}">
+        </div>
+      </div>
+
+      <label class="form-label">Farbe</label>
+      <input type="color" name="color" class="form-control form-control-color mb-3" value="{{ task.color if task.color else '#3df010' }}">
+      <div class="form-text mb-4">Nur Titel, Datum und Farbe sind bei festen Ereignissen änderbar.</div>
+    {% endif %}
+    <button class="btn btn-primary w-100" style="font-size: 1.2rem;">✅ Änderungen speichern</button>
+        </form>
+      </div>
+    </div>
+
+    {% if task.attachments %}
+      <hr>
+      <h5 class="mt-4 text-center">📎 Bereits hochgeladene Dateien</h5>
+      <div class="row g-3 justify-content-center">
+        {% for attachment in task.attachments %}
+          <div class="col-md-4 text-center">
+            {% set file = attachment.filename %}
+            {% if file.endswith(".png") or file.endswith(".jpg") or file.endswith(".jpeg") or file.endswith(".gif") %}
+              <img src="{{ url_for('static', filename='uploads/' ~ file) }}" class="img-fluid rounded border mb-2" alt="Bild" style="max-height: 120px;">
+            {% else %}
+              <a href="{{ url_for('static', filename='uploads/' ~ file) }}" target="_blank" class="btn btn-outline-info btn-sm mb-2">{{ file }}</a><br>
+            {% endif %}
+            <form method="POST" action="{{ url_for('delete_attachment', attachment_id=attachment.id) }}" class="mt-2">
+              <button class="btn btn-sm btn-outline-danger">🗑️ Löschen</button>
+            </form>
+          </div>
+        {% endfor %}
+      </div>
+    {% endif %}
+
+    <a href="/" class="btn btn-outline-secondary w-100 mt-4" style="font-size: 1.1rem;">⬅️ Zurück zur Übersicht</a>
+    <footer class="footer mt-5" style="background: transparent; border: none; border-radius: 0 0 18px 18px; box-shadow: none; padding: 0.3rem 0;">
+      <div class="container text-center">
+        <span class="text-muted" style="font-size: 1.1rem;">© 2025 MoppDiary &ndash; Projektteam <span style="color: #e25555;">♥</span> Katja, Mirko, Najat</span>
+      </div>
+    </footer>
+  </div>
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+</body>
+</html>

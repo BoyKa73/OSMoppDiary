@@ -1,0 +1,21 @@
+# Virtuelle Umgebung
+venv/
+.venv/
+./venv
+venv-omoppdiary/
+
+# Python-Cache
+__pycache__/
+*.pyc
+
+# SQLite-Datenbank später nicht mitpushen, da privat
+instance/diary.db
+instance/uploads/
+
+# Umgebungsvariablen später nicht mitpushen, da womöglich lokal anders
+# .env
+
+migrations/
+
+# VSCode-Ordner
+.vscode/

@@ -1,0 +1,112 @@
+
+<!DOCTYPE html>
+<html lang="de">
+<head>
+    <meta charset="UTF-8">
+    <title>Suche</title>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css">
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+    <style>
+      @media print {
+        .card img {
+          max-width: 800px;
+          max-height: 900px;
+          width: auto !important;
+          height: auto !important;
+          display: block;
+          margin: 8px auto;
+        }
+      }
+    </style>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Caveat:wght@400..700&display=swap" rel="stylesheet">
+</head>
+
+<body class="container mt-5" style="font-family: 'Caveat', cursive; background-image: url('/static/Texturelabs_Sky_140M.jpg'); background-size: cover; background-position: center; background-attachment: fixed;">
+  <div class="main-box p-4" style="background: rgba(255,255,255,0.15); border-radius: 18px; box-shadow: 0 2px 8px rgba(102,102,153,0.08); padding: 2rem 1rem; border-radius:30px; max-width: 1100px; margin: 0 auto;">
+    <h1 class="mb-4 text-center" style="color: #333333; font-size: 2.5rem; font-weight: bold;">
+      <img src="{{ url_for('static', filename='journal_diary_905 (1).png') }}" alt="MoppDiary" style="height: 40px; width: auto; margin-right: 10px;" onerror="this.style.display='none';">
+      🔍 Suchergebnisse für "{{ query }}"
+    </h1>
+    <div class="card shadow-sm hover-card" style="border-radius: 16px; overflow: hidden; background: #f8f9fa;">
+      <div class="card-body">
+        {% if tasks %}
+        <!-- Toolbar für Export/Druck -->
+        <div class="d-flex flex-wrap align-items-center justify-content-between mb-3 gap-2 sticky-toolbar" style="position:sticky;top:0;z-index:20;background:rgba(248,249,250,0.97);border-radius:14px;padding:0.7rem 1rem 0.7rem 0.7rem;box-shadow:0 2px 8px rgba(102,102,153,0.08);">
+          <div class="d-flex align-items-center gap-2">
+            <input type="checkbox" id="selectAllCards" class="form-check-input me-2">
+            <label for="selectAllCards" class="form-check-label">Alle auswählen</label>
+          </div>
+          <div class="btn-group" role="group">
+            <button id="exportPdfBtn" class="btn btn-outline-dark">📄 PDF Export</button>
+            <button id="exportCsvBtn" class="btn btn-outline-dark">📊 CSV Export</button>
+            <button id="printBtn" class="btn btn-outline-secondary">🖨️ Drucken</button>
+          </div>
+          <div class="ms-3 text-muted" style="font-size:1.05rem;white-space:nowrap;">
+            <span style="color:#4B367C;font-weight:500;">Hinweis:</span> Aktionen beziehen sich auf die <b>ausgewählten Einträge</b>.
+          </div>
+        </div>
+        <div class="row g-4" id="searchCardsContainer">
+          {% for task in tasks %}
+          <div class="col-md-6 col-lg-4">
+            <div class="card shadow-sm" style="border-radius: 18px; margin-bottom: 18px; background: rgba(255,255,255,0.93); box-shadow: 0 3px 12px rgba(102,102,153,0.13);">
+              <div class="card-body"
+                   data-taskid="{{ task.id }}"
+                   data-title="{{ task.title or '' }}"
+                   data-category="{{ task.category or '' }}"
+                   data-mood="{{ task.mood or '' }}"
+                   data-date="{% if task.start_date %}{{ task.start_date.strftime('%d.%m.%Y %H:%M') }}{% endif %}{% if task.end_date %} – {{ task.end_date.strftime('%d.%m.%Y %H:%M') }}{% endif %}"
+                   data-people="{{ task.people or '' }}"
+                   data-content="{{ task.content or '' }}"
+                   data-attachments="{% if task.attachments %}{% for attachment in task.attachments %}{{ attachment.filename.split('/')[-1] }}{% if not loop.last %}, {% endif %}{% endfor %}{% endif %}">
+                <div class="form-check mb-2">
+                  <input type="checkbox" class="form-check-input card-select-checkbox" id="cardCheck{{ task.id }}" data-taskid="{{ task.id }}">
+                  <label class="form-check-label" for="cardCheck{{ task.id }}">Auswählen</label>
+                </div>
+                <h5 class="card-title mb-2" style="color: #223C60; font-weight: bold;">{{ task.title or 'Kein Titel' }}</h5>
+                <div class="mb-1"><span style="color:#4B367C; font-weight:600;">Kategorie:</span> {{ task.category or '-' }}</div>
+                <div class="mb-1"><span style="color:#4B367C; font-weight:600;">Stimmung:</span> {{ task.mood or '-' }}</div>
+                <div class="mb-1"><span style="color:#4B367C; font-weight:600;">Datum:</span> {{ task.start_date.strftime('%d.%m.%Y %H:%M') if task.start_date else '-' }}{% if task.end_date %} &ndash; {{ task.end_date.strftime('%d.%m.%Y %H:%M') }}{% endif %}</div>
+                <div class="mb-1"><span style="color:#4B367C; font-weight:600;">Beteiligte:</span> {{ task.people or '-' }}</div>
+                <div class="mb-2"><span style="color:#4B367C; font-weight:600;">Inhalt:</span> {{ task.content or '-' }}</div>
+                {% if task.attachments %}
+                <div class="mt-1">
+                  <strong style="font-size: 0.98rem;">Dateianhänge:</strong>
+                  <ul class="mb-0 ps-3" style="font-size: 0.97rem; background: transparent;">
+                    {% for attachment in task.attachments %}
+                    <li style="margin-bottom: 2px; background: transparent;">
+                      <a href="{{ url_for('download_attachment', task_id=task.id, filename=attachment.filename.split('/')[-1]) }}" target="_blank" class="btn btn-outline-info btn-sm mb-1" style="font-size: 0.97rem;">
+                        {{ attachment.filename.split('/')[-1] }}
+                      </a>
+                      {% set ext = attachment.filename.split('.')[-1]|lower %}
+                      {% if ext in ['jpg', 'jpeg', 'png', 'gif'] %}
+                        <br>
+                        <img src="{{ url_for('download_attachment', task_id=task.id, filename=attachment.filename.split('/')[-1]) }}" alt="Bild" style="max-width:180px;max-height:120px;border-radius:8px;margin-top:4px;box-shadow:0 2px 8px rgba(102,102,153,0.13);">
+                      {% endif %}
+                    </li>
+                    {% endfor %}
+                  </ul>
+                </div>
+                {% endif %}
+              </div>
+            </div>
+          </div>
+          {% endfor %}
+        </div>
+        {% else %}
+        <div class="alert alert-info text-center w-100" style="font-size: 1.08rem; border-radius: 14px; background: transparent; border: none; color: #4B367C;">Keine Einträge gefunden.</div>
+        {% endif %}
+      </div>
+    </div>
+    <a href="/" class="btn btn-outline-secondary w-100 mt-4" style="font-size: 1.1rem;">⬅️ Zurück zur Übersicht</a>
+    <footer class="footer mt-5" style="background: transparent; border: none; border-radius: 0 0 18px 18px; box-shadow: none; padding: 0.3rem 0;">
+      <div class="container text-center">
+        <span class="text-muted" style="font-size: 1.1rem;">© 2025 MoppDiary &ndash; Projektteam <span style="color: #e25555;">♥</span> Katja, Mirko, Najat</span>
+      </div>
+    </footer>
+  </div>
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+  <script src="{{ url_for('static', filename='search.js') }}"></script>
+</body>
+</html>

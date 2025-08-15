@@ -1,0 +1,189 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+    <meta charset="UTF-8">
+    <title>Online-Adventskalender</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <link rel="icon" href="{{ url_for('static', filename='favicon.png') }}">
+    <style>
+        body {
+        font-family: Arial, sans-serif;
+        background-color: #C56714;
+        margin: 0;
+        padding: 20px;
+        text-align: center;
+        color: white;
+        }
+
+        #Alles {
+        max-width: 1200px; /* größer machen */
+        margin: 0 auto;
+        background-color: #8B4513;
+        padding: 20px;
+        border-radius: 10px;
+        box-shadow: 0 0 10px rgba(0,0,0,0.5);
+        }
+
+        .kalender-container {
+        position: relative;
+        margin: 20px auto;
+        }
+
+        #Tabelle1, #Tabelle2 {
+        border-collapse: collapse;
+        table-layout: fixed; /* gleichmäßige Spalten */
+        width: 100%;
+        }
+
+        #Tabelle1 td, #Tabelle2 td {
+        width: calc(100% / 6); /* 6 Spalten gleichmäßig */
+        height: 150px; /* gleich hohe Felder */
+        padding: 0;
+        text-align: center;
+        vertical-align: middle;
+        }
+
+        #Tabelle1 td {
+        font-size: 26px;
+        font-weight: bold;
+        background-color: #A0522D;
+        color: white;
+        border: 2px solid #C56714;
+        position: relative;
+        }
+
+        #Tabelle2 {
+        position: absolute;
+        top: 0;
+        left: 0;
+        }
+
+        #Tabelle2 a {
+        display: block;
+        height: 100%;
+        }
+
+        #Tabelle2 img {
+        width: 100%;
+        height: 100%;
+        object-fit: contain; /* Bild vollständig sichtbar, keine Verzerrung */
+        border: none;
+        transition: opacity 0.3s;
+        display: block;
+        }
+
+        #Tabelle2 img:hover {
+        opacity: 0;
+        }
+        
+        .Fusstext {
+            margin-top: 20px;
+            font-size: 16px;
+            color: #FFD700;
+        }
+    </style>
+</head>
+<body>
+    <div id="Alles">
+        <div class="Titeltext">Adventskalender</div>
+        
+        <div class="kalender-container">
+            <!-- Zahlen-Tabelle (wird zunächst verdeckt) -->
+            <table id="Tabelle1">
+                <tr>
+                    <td>23</td><td>14</td><td>16</td><td>21</td><td>5</td><td>12</td>
+                </tr>
+                <tr>
+                    <td>20</td><td>13</td><td>1</td><td>24</td><td>2</td><td>11</td>
+                </tr>
+                <tr>
+                    <td>15</td><td>17</td><td>3</td><td>6</td><td>22</td><td>7</td>
+                </tr>
+                <tr>
+                    <td>19</td><td>9</td><td>8</td><td>18</td><td>4</td><td>10</td>
+                </tr>
+            </table>
+            
+            <!-- Grafik-Tabelle (deckt die Zahlen ab) -->
+            <table id="Tabelle2">
+                <tr>
+                    <td><a href="javascript:zeigeDatei(23);"><img src="{{ url_for('static', filename='/backen-200.png') }}"alt="Tag 23"></a></td>
+                    <td><a href="javascript:zeigeDatei(14);"><img src="{{ url_for('static', filename='/backen-200.png') }}" alt="Tag 14"></a></td>
+                    <td><a href="javascript:zeigeDatei(16);"><img src="{{ url_for('static', filename='/backen-200.png') }}" alt="Tag 16"></a></td>
+                    <td><a href="javascript:zeigeDatei(21);"><img src="{{ url_for('static', filename='/backen-200.png') }}" alt="Tag 21"></a></td>
+                    <td><a href="javascript:zeigeDatei(5);"><img src="{{ url_for('static', filename='/backen-200.png') }}" alt="Tag 5"></a></td>
+                    <td><a href="javascript:zeigeDatei(12);"><img src="{{ url_for('static', filename='/backen-200.png') }}" alt="Tag 12"></a></td>
+                </tr>
+                <tr>
+                    <td><a href="javascript:zeigeDatei(20);"><img src="{{ url_for('static', filename='/backen-200.png') }}" alt="Tag 20"></a></td>
+                    <td><a href="javascript:zeigeDatei(13);"><img src="{{ url_for('static', filename='/backen-200.png') }}" alt="Tag 13"></a></td>
+                    <td><a href="javascript:zeigeDatei(1);"><img src="{{ url_for('static', filename='/backen-200.png') }}" alt="Tag 1"></a></td>
+                    <td><a href="javascript:zeigeDatei(24);"><img src="{{ url_for('static', filename='/backen-200.png') }}" alt="Tag 24"></a></td>
+                    <td><a href="javascript:zeigeDatei(2);"><img src="{{ url_for('static', filename='/backen-200.png') }}" alt="Tag 2"></a></td>
+                    <td><a href="javascript:zeigeDatei(11);"><img src="{{ url_for('static', filename='/backen-200.png') }}" alt="Tag 11"></a></td>
+                </tr>
+                <tr>
+                    <td><a href="javascript:zeigeDatei(15);"><img src="{{ url_for('static', filename='/backen-200.png') }}" alt="Tag 15"></a></td>
+                    <td><a href="javascript:zeigeDatei(17);"><img src="{{ url_for('static', filename='/backen-200.png') }}" alt="Tag 17"></a></td>
+                    <td><a href="javascript:zeigeDatei(3);"><img src="{{ url_for('static', filename='/backen-200.png') }}" alt="Tag 3"></a></td>
+                    <td><a href="javascript:zeigeDatei(6);"><img src="{{ url_for('static', filename='/backen-200.png') }}" alt="Tag 6"></a></td>
+                    <td><a href="javascript:zeigeDatei(22);"><img src="{{ url_for('static', filename='/backen-200.png') }}" alt="Tag 22"></a></td>
+                    <td><a href="javascript:zeigeDatei(7);"><img src="{{ url_for('static', filename='/backen-200.png') }}" alt="Tag 7"></a></td>
+                </tr>
+                <tr>
+                    <td><a href="javascript:zeigeDatei(19);"><img src="{{ url_for('static', filename='/backen-200.png') }}" alt="Tag 19"></a></td>
+                    <td><a href="javascript:zeigeDatei(9);"><img src="{{ url_for('static', filename='/backen-200.png') }}" alt="Tag 9"></a></td>
+                    <td><a href="javascript:zeigeDatei(8);"><img src="{{ url_for('static', filename='/backen-200.png') }}" alt="Tag 8"></a></td>
+                    <td><a href="javascript:zeigeDatei(18);"><img src="{{ url_for('static', filename='/backen-200.png') }}" alt="Tag 18"></a></td>
+                    <td><a href="javascript:zeigeDatei(4);"><img src="{{ url_for('static', filename='/backen-200.png') }}" alt="Tag 4"></a></td>
+                    <td><a href="javascript:zeigeDatei(10);"><img src="{{ url_for('static', filename='/backen-200.png') }}" alt="Tag 10"></a></td>
+                </tr>
+            </table>
+        </div>
+        
+        <p class="Fusstext">
+            <script>
+                // Datumsfunktionen
+                var Kalnow = new Date();
+                var Kalyear = Kalnow.getFullYear();
+
+                function Warten01() {
+                    var KalZiel = new Date("December 25, " + Kalyear);
+                    var diff = KalZiel.getTime() - Kalnow.getTime();
+                    var days = Math.floor(diff / (1000 * 60 * 60 * 24));
+
+                    if (days > 1) return "Noch " + (days+1) + " Tage bis Weihnachten";
+                    else if (days == 1) return "Morgen ist Heiligabend!";
+                    else if (days == 0) return "Heute ist Heiligabend!";
+                    else return "Frohe Weihnachten!";
+                }
+
+                function Warten02() {
+                    var KalStart = new Date("December 1, " + Kalyear);
+                    var diff = KalStart.getTime() - Kalnow.getTime();
+                    var Tage = Math.floor(diff / (1000 * 60 * 60 * 24));
+                    var monat = Kalnow.getMonth() + 1;
+
+                    if (monat != 12) {
+                        if (Tage >= 1) return "Noch " + (Tage+1) + " Tage bis zum ersten Fensterchen";
+                        else return "Morgen wird das erste Fensterchen geöffnet.";
+                    }
+                    if (monat == 12 && Tage <= -1 && Tage >= -24) return 'Öffnen Sie das Fensterchen für heute!';
+                    if (monat == 12 && Tage <= -24) return 'Alle Fensterchen dürfen geöffnet werden.';
+                    return "";
+                }
+
+                document.write(Warten02() + '<br>' + Warten01());
+            </script>
+        </p>
+    </div>
+
+    <script>
+        function zeigeDatei(KlickZahl) {
+            // Hier können Sie die Logik für das Öffnen der Tagesdateien anpassen
+            alert("Türchen " + KlickZahl + " würde jetzt geöffnet werden");
+            // window.location.href = "/tagesdateien/" + KlickZahl;
+        }
+    </script>
+</body>
+</html>

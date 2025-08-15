@@ -1,0 +1,835 @@
+<!DOCTYPE html>
+<html lang="de">
+
+<head>
+  <meta charset="UTF-8">
+  <title>MoppDiary</title>
+
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <link rel="icon" href="{{ url_for('static', filename='favicon.png') }}">
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+  <link href="https://cdn.jsdelivr.net/npm/fullcalendar@6.1.8/main.min.css" rel="stylesheet">
+  <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/lipis/flag-icons@7.3.2/css/flag-icons.min.css" />
+  <link href="https://fonts.googleapis.com/css2?family=Caveat:wght@400..700&display=swap" rel="stylesheet">
+  <script src="https://cdn.jsdelivr.net/npm/fullcalendar@6.1.8/index.global.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+
+</head>
+
+<body class="container mt-5">
+
+
+
+  {% with messages = get_flashed_messages(with_categories=true) %}
+  {% if messages %}
+  <div class="container mt-2">
+    {% for category, message in messages %}
+    <div
+      class="alert alert-{{ 'success' if category == 'success' else 'danger' if category == 'danger' else 'info' }} alert-dismissible fade show"
+      role="alert">
+      {{ message }}
+      <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Schließen"></button>
+    </div>
+    {% endfor %}
+  </div>
+  {% endif %}
+  {% endwith %}
+
+
+  <!-- Haupt-Container -->
+  <div class="main-box p-4" style="background: rgba(255, 255, 255, 0.15);
+  border-radius: 18px;
+  box-shadow: 0 2px 8px rgba(102,102,153,0.08);
+  padding: 2rem 1rem; border-radius:30px;">
+    <h1 class="mb-4 text-center" style="color: #333333; font-size: 3rem; font-weight: bold;">
+      <img src="{{ url_for('static', filename='journal_diary_905 (1).png') }}" alt="MoppDiary"
+        style="height: 40px; width: auto; margin-right: 10px;" onerror="this.style.display='none';">
+      MoppDiary
+    </h1>
+
+    <!-- Begrüßungstext (direkt über der Navbar) -->
+    {% if current_user.is_authenticated %}
+    <div class="user-greeting user-greeting-green">
+      <span class="greet-icon" aria-hidden="true"></span>
+      <span class="greet-text">Hallo <strong>{{ current_user.username }}</strong></span>
+    </div>
+    {% endif %}
+
+    <!-- Erste Navigation Bar -->
+    <nav id="mainNavbar" class="navbar navbar-expand-lg mb-0" style="background: linear-gradient(90deg, rgba(75,54,124,0.12) 0%, rgba(230,230,250,0.80) 100%);
+                backdrop-filter: blur(2px);
+                border-radius: 10px 10px 0 0;
+                padding: 0.8rem 1.2rem;">
+      <div class="container-fluid">
+        <!-- Motivationsspruch -->
+        <div class="text-center mb-2" style="flex-grow: 1;">
+          <span class="navbar-text"
+            style="font-family: 'Caveat', cursive; font-size: 1.3rem; color: #000000; font-weight: 600;">
+            🌟 {{ quote_of_the_day }}
+          </span>
+        </div>
+
+
+        <!-- Sprachauswahl & Style-Toggle -->
+        <div class="d-flex align-items-center me-3">
+          <div class="d-flex align-items-center gap-2">
+            <!-- Sprachauswahl -->
+            <select class="form-select form-select-sm" style="height: 32px;" onchange="changeLanguage(this.value)">
+              <option value="de"><img src="/static/germany-flag.png" class="flag-icon"> DE</option>
+              <option value="en"><img src="/static/uk-flag.png" class="flag-icon"> EN</option>
+              <option value="fr"><img src="/static/france-flag.png" class="flag-icon"> FR</option>
+            </select>
+            <button id="styleToggle" class="btn btn-sm btn-outline-secondary" onclick="toggleStyle()">🌙</button>
+          </div>
+        </div>
+
+        <!-- Login/Logout-Buttons -->
+        <div class="navbar-collapse" style="flex-grow: 0;"> <!-- Verhindert ungewünschtes Aufdehnen -->
+          <ul class="navbar-nav">
+            {% if current_user.is_authenticated %}
+            <li class="nav-item">
+              <a class="nav-link" href="/logout" id="logoutButton">
+                <button class="power-button logged-in" title="Abmelden">
+                  <i>⏻</i> <!-- Power-Symbol -->
+                </button>
+              </a>
+            </li>
+            {% else %}
+            <li class="nav-item">
+              <a class="nav-link" href="/login">
+                <button class="power-button" title="Anmelden">
+                  <i>⏻</i> <!-- Power-Symbol -->
+                </button>
+              </a>
+            </li>
+            {% endif %}
+          </ul>
+        </div>
+      </div>
+    </nav>
+
+    <!-- Zweite NavigationsLeiste: Downcounter -->
+    <nav class="navbar navbar-expand-lg navbar-light shadow-sm" style="margin-top: -4px; margin-bottom: 1.5rem;">
+      <div class="w-100 py-2 px-2 mb-4 text-center" id="downcounter-navbar-bg"
+        style="background: linear-gradient(90deg, rgba(75,54,124,0.12) 0%, rgba(230,230,250,0.80) 100%); backdrop-filter: blur(2px); border-radius: 0 0 12px 12px;">
+        <div class="container-fluid">
+          <div class="row justify-content-center align-items-center g-2">
+            <!-- Resturlaubs-Counter -->
+            <div class="col-12 col-md-3 d-flex flex-column align-items-center justify-content-center mb-2 mb-md-0">
+              <div class="d-flex align-items-center">
+                <span class="me-2 fs-4">
+                  <span title="Resturlaub" style="font-size:1.5rem;">🏖️</span>
+                </span>
+                <span class="fw-semibold">REST-URLAUB</span>
+              </div>
+
+              <div class="countdown-container mt-2">
+                <div class="calendar-day"
+                  style="background: white; border: 2px solid #4B367C; border-radius: 8px; width: 60px; height: 60px; display: flex; flex-direction: column; align-items: center; justify-content: center; margin: 0 auto; box-shadow: 0 2px 5px rgba(0,0,0,0.1);">
+                  <div class="days-count" style="font-size: 1.5rem; font-weight: bold; color: #4B367C;">
+                    {{ working_days.remaining_vac_days }}
+                  </div>
+                  <div
+                    style="font-size: 0.85rem; color: #2d2d3a; font-weight: 700; letter-spacing: 0.04em; text-transform: uppercase; font-family: 'Caveat', cursive, Arial, sans-serif;">
+                    Tage
+                  </div>
+                </div>
+                <div class="time-remaining mt-2"
+                  style="background: rgba(75,54,124,0.1); border-radius: 6px; padding: 4px 8px; font-size: 0.9rem; text-align: center;">
+                  <span>von {{ total_vac_days }}</span>
+                </div>
+              </div>
+            </div>
+
+            {% for event in next_events %}
+            <div class="col-12 col-md-3 d-flex flex-column align-items-center justify-content-center mb-2 mb-md-0">
+              <div class="d-flex align-items-center">
+                <span class="me-2 fs-4">
+                  {% if event.id == 33 %}
+                  <span title="Resttage bis Winterferien" style="font-size:1.5rem;">🎄</span>
+                  {% elif event.id == 44 %}
+                  <span title="Präsentation" style="font-size:1.5rem;"></span>
+                  {% elif event.id == 17 %}
+                  <span title="Abschlussprojekt" style="font-size:1.5rem;">🎓</span>
+                  {% endif %}
+                </span>
+                <span class="fw-semibold">
+                  {% if event.id == 33 %}
+                  <a href="javascript:void(0);"
+                    onclick="window.open('/adventskalender', 'Adventskalender', 'width=800,height=700,scrollbars=yes');"
+                    title="Zum Adventskalender" style="text-decoration: none; color: inherit; cursor: pointer;"
+                    onmouseover="this.style.textDecoration='underline';" onmouseout="this.style.textDecoration='none';">
+                    {{ event.title }}
+                  </a>
+                  {% else %}
+                  {{ event.title }}
+                  {% endif %}
+                </span>
+              </div>
+
+              <div class="countdown-container mt-2">
+                <div class="calendar-day"
+                  style="background: white; border: 2px solid #4B367C; border-radius: 8px; width: 60px; height: 60px; display: flex; flex-direction: column; align-items: center; justify-content: center; margin: 0 auto; box-shadow: 0 2px 5px rgba(0,0,0,0.1);">
+                  <div class="days-count" style="font-size: 1.5rem; font-weight: bold; color: #4B367C;">
+                    {% if event.id == 44 %}
+                    {{ event.working_days }}
+                    {% else %}
+                    0
+                    {% endif %}
+                  </div>
+                  <div
+                    style="font-size: 0.85rem; color: #2d2d3a; font-weight: 700; letter-spacing: 0.04em; text-transform: uppercase; font-family: 'Caveat', cursive, Arial, sans-serif;">
+                    Tage
+                  </div>
+                </div>
+                <div class="time-remaining mt-2"
+                  style="background: rgba(75,54,124,0.1); border-radius: 6px; padding: 4px 8px; font-size: 0.9rem; text-align: center;">
+                  <span class="hours">00</span>:<span class="minutes">00</span>:<span class="seconds">00</span>
+                </div>
+              </div>
+
+              <span class="countdown countdown-{{ loop.index }}" data-date="{{ event.date }}" {% if event.id==44 %}
+                data-event-id="44" {% endif %} style="display: none;"></span>
+            </div>
+            {% endfor %}
+          </div>
+        </div>
+      </div>
+    </nav>
+    <!-- Ende zweite Navigations-Leiste -->
+
+    <!-- Countdown-Skript ausgelagert nach main.js -->
+
+
+    <!-- 🧩 Content Cards - Horizontal Layout mit integrierten Buttons -->
+    <div class="container-fluid">
+      <div class="row gx-4 mb-4">
+        <!-- Card 1: Neuer Eintrag -->
+        <div class="col-md-4">
+          <div class="card shadow-sm hover-card h-100" style="border-radius: 12px; overflow: hidden;">
+            <div class="card-header bg-primary text-white text-center" style="border-radius: 12px 12px 0 0;">
+              <button class="btn btn-light btn-lg w-100" data-bs-toggle="collapse" data-bs-target="#entryCardContent"
+                aria-expanded="false" aria-controls="entryCardContent">
+                📝 Neuer Eintrag
+              </button>
+            </div>
+            <div id="entryCardContent" class="collapse">
+              <div class="card-body">
+                {% if current_user.is_authenticated %}
+
+                <form method="POST" enctype="multipart/form-data">
+
+
+                  <label class="form-label">Titel</label>
+                  <input type="text" name="title" class="form-control mb-2" required maxlength="200"
+                    placeholder="Was ist geschehen?" oninvalid="this.setCustomValidity('Bitte einen Titel eingeben!')"
+                    oninput="this.setCustomValidity('')">
+
+                  <div class="mb-2">
+                    <label class="form-label" for="allDayCheckbox">Kalender Rubrik all-day</label>
+                    <input class="form-check-input ms-2" type="checkbox" name="all_day" id="allDayCheckbox">
+                  </div>
+
+                  <label class="form-label">Startdatum</label>
+                  <input type="date" name="start_date" class="form-control mb-2" value="{{ today }}">
+
+                  <label class="form-label">Startuhrzeit</label>
+                  <input type="time" name="start_time" id="startTimeInput" class="form-control mb-2">
+
+                  <label class="form-label">Enddatum</label>
+                  <input type="date" name="end_date" class="form-control mb-2" value="{{ today }}">
+                  <label class="form-label">Enduhrzeit</label>
+                  <input type="time" name="end_time" id="endTimeInput" class="form-control mb-2">
+
+                  <label class="form-label">Farbe <span data-bs-toggle="tooltip"
+                      title="In dieser Farbe wird der Eintrag im Kalender angezeigt">🛈</span></label>
+                  <input type="color" name="color" class="form-control mb-2" value="#4735e7"
+                    title="In dieser Farbe wird der Eintrag im Kalender angezeigt">
+
+                  <label class="form-label">Inhalt</label>
+                  <textarea name="content" class="form-control mb-2" maxlength="1800"
+                    placeholder="weitere Beschreibung"></textarea>
+
+                  <label class="form-label">Beteiligte Personen</label>
+                  <input type="text" name="people" class="form-control mb-2" maxlength="100">
+
+                  <label class="form-label">Stimmung</label>
+                  <select name="mood" class="form-select mb-3">
+                    <option value="Neutral">Neutral</option>
+                    <option value="Fröhlich">Fröhlich</option>
+                    <option value="Traurig">Traurig</option>
+                    <option value="Wütend">Wütend</option>
+                    <option value="Depressiv">Depressiv</option>
+                    <option value="Müde">Müde</option>
+                    <option value="Träge">Träge</option>
+                    <option value="Ausgelassen">Ausgelassen</option>
+                    <option value="Zynisch">Zynisch</option>
+                    <option value="Einsam">Einsam</option>
+                    <option value="Allein">Allein</option>
+                    <option value="Liebeskummer">Liebeskummer</option>
+                    <option value="Verliebt">Verliebt</option>
+                    <option value="Beobachtet">Beobachtet</option>
+                    <option value="Überfordert">Überfordert</option>
+                    <option value="Entspannt">Entspannt</option>
+                    <option value="Angst">Angst</option>
+                    <option value="Schüchtern">Schüchtern</option>
+                    <option value="Verfolgt">Verfolgt</option>
+                    <option value="Überrascht">Überrascht</option>
+                    <option value="Erschöpft">Erschöpft</option>
+                    <option value="Euphorisch">Euphorisch</option>
+                    <option value="Verwirrt">Verwirrt</option>
+                    <option value="Erleichtert">Erleichtert</option>
+                    <option value="Schuldig">Schuldig</option>
+                    <option value="Schockiert">Schockiert</option>
+                    <option value="Enttäuscht">Enttäuscht</option>
+                    <option value="Erstaunt">Erstaunt</option>
+                    <option value="Angespannt">Angespannt</option>
+                    <option value="Gelassen">Gelassen</option>
+                    <option value="Aufgeregt">Aufgeregt</option>
+                    <option value="Kummer">Kummer</option>
+                    <option value="Überwältigt">Überwältigt</option>
+                    <option value="Satt">Satt</option>
+                    <option value="Hungrig">Hungrig</option>
+                    <option value="Durstig">Durstig</option>
+                    <option value="Erfrischt">Erfrischt</option>
+                    <option value="Erfüllt">Erfüllt</option>
+                    <option value="Unmotiviert">Unmotiviert</option>
+                  </select>
+
+                  <label class="form-label">Kategorie</label>
+                  <select name="category" class="form-select mb-3">
+                    <option value="Alltag">Alltag</option>
+                    <option value="Zwischenmenschlich">Zwischenmenschlich</option>
+                    <option value="Reflexion">Reflexion</option>
+                    <option value="Konflikt">Konflikt</option>
+                    <option value="Privat">Privat</option>
+                    <option value="Beruflich">Beruflich</option>
+                    <option value="Urlaub">Urlaub</option>
+                    <option value="Gesundheit">Gesundheit</option>
+                    <option value="Finanzen">Finanzen</option>
+                    <option value="Reisen">Reisen</option>
+                    <option value="Hobbys">Hobbys</option>
+                    <option value="Familie">Familie</option>
+                    <option value="Freunde">Freunde</option>
+                    <option value="Beziehungen">Beziehungen</option>
+                    <option value="Selbstentwicklung">Selbstentwicklung</option>
+                    <option value="Spiritualität">Spiritualität</option>
+                    <option value="Gesellschaft">Gesellschaft</option>
+                    <option value="Politik">Politik</option>
+                    <option value="Kreativität">Kreativität</option>
+                    <option value="Schule/Bildung">Schule/Bildung</option>
+                    <option value="Technologie">Technologie</option>
+                    <option value="Umwelt">Umwelt</option>
+                    <option value="Ereignis">Ereignis</option>
+                    <option value="Ernährung">Ernährung</option>
+                    <option value="Sport">Sport</option>
+                    <option value="Kunst">Kunst</option>
+                    <option value="Musik">Musik</option>
+                    <option value="Literatur">Literatur</option>
+                    <option value="Film">Film</option>
+                    <option value="Spiele">Spiele</option>
+                    <option value="Natur">Natur</option>
+                    <option value="Wissenschaft">Wissenschaft</option>
+                    <option value="Philosophie">Philosophie</option>
+                    <option value="Geschichte">Geschichte</option>
+                    <option value="Kultur">Kultur</option>
+                    <option value="Recht">Recht</option>
+                    <option value="Soziales">Soziales</option>
+                    <option value="Ethische Fragen">Ethische Fragen</option>
+                    <option value="Sonstiges">Sonstiges</option>
+                    <option value="Mentale Gesundheit">Mentale Gesundheit</option>
+                  </select>
+
+                  <label class="form-label">📎 Dateien anhängen</label>
+                  <input type="file" name="attachments" class="form-control mb-2" multiple>
+                  <small class="text-muted">Erlaubte Dateitypen: png, jpg, jpeg, gif, pdf, txt, odf, ods, doc,
+                    docx</small>
+                  <p>Mehrere Dateien auswählbar. Weitere Anhänge über 'Bearbeiten' hinzufügen.</p>
+                  <button type="submit" class="btn btn-primary w-100">Speichern</button>
+                </form>
+                {% else %}
+                <div class="alert alert-info text-center">
+                  <strong>Bitte einloggen, um neue Einträge zu erstellen!</strong>
+                </div>
+                {% endif %}
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Card 2: Suche -->
+        <div class="col-md-4">
+          <div class="card shadow-sm hover-card h-100" style="border-radius: 12px; overflow: hidden;">
+            <div class="card-header bg-secondary text-white text-center" style="border-radius: 12px 12px 0 0;">
+              <button class="btn btn-light btn-lg w-100 collapsed" data-bs-toggle="collapse"
+                data-bs-target="#searchCardContent" aria-expanded="false" aria-controls="searchCardContent">
+                🔍 Suche Einträge
+              </button>
+            </div>
+            <div id="searchCardContent" class="collapse">
+              <div class="card-body">
+                <form method="GET" action="/search">
+                  <div class="mb-3">
+                    <label for="categoryFilter" class="form-label">🔍 Nach Kategorie</label>
+                    <select id="categoryFilter" name="category" class="form-select" aria-label="Kategorie filtern">
+                      <option value="">Alle Kategorien</option>
+                      <option value="Alltag">Alltag</option>
+                      <option value="Zwischenmenschlich">Zwischenmenschlich</option>
+                      <option value="Reflexion">Reflexion</option>
+                      <option value="Konflikt">Konflikt</option>
+                      <option value="Privat">Privat</option>
+                      <option value="Arbeit">Arbeit</option>
+                      <option value="Urlaub">Urlaub</option>
+                      <option value="Feiertag">Feiertag</option>
+                      <option value="Gesundheit">Gesundheit</option>
+                      <option value="Finanzen">Finanzen</option>
+                      <option value="Reisen">Reisen</option>
+                      <option value="Hobbys">Hobbys</option>
+                      <option value="Familie">Familie</option>
+                      <option value="Freunde">Freunde</option>
+                      <option value="Beziehungen">Beziehungen</option>
+                      <option value="Selbstentwicklung">Selbstentwicklung</option>
+                      <option value="Spiritualität">Spiritualität</option>
+                      <option value="Gesellschaft">Gesellschaft</option>
+                      <option value="Politik">Politik</option>
+                      <option value="Kreativität">Kreativität</option>
+                      <option value="Schule/Bildung">Schule/Bildung</option>
+                      <option value="Technologie">Technologie</option>
+                      <option value="Umwelt">Umwelt</option>
+                      <option value="Ereignis">Ereignis</option>
+                      <option value="Ernährung">Ernährung</option>
+                      <option value="Sport">Sport</option>
+                      <option value="Kunst">Kunst</option>
+                      <option value="Musik">Musik</option>
+                      <option value="Literatur">Literatur</option>
+                      <option value="Film">Film</option>
+                      <option value="Spiele">Spiele</option>
+                      <option value="Natur">Natur</option>
+                      <option value="Wissenschaft">Wissenschaft</option>
+                      <option value="Philosophie">Philosophie</option>
+                      <option value="Geschichte">Geschichte</option>
+                      <option value="Kultur">Kultur</option>
+                      <option value="Recht">Recht</option>
+                      <option value="Soziales">Soziales</option>
+                      <option value="Ethische Fragen">Ethische Fragen</option>
+                      <option value="Sonstiges">Sonstiges</option>
+                      <option value="Mentale Gesundheit">Mentale Gesundheit</option>
+                    </select>
+                  </div>
+                  <div class="mb-3">
+                    <label for="searchMood" class="form-label">😶 Nach Stimmung</label>
+                    <select id="searchMood" name="mood" class="form-select mb-3">
+                      <option value="">Alle Stimmungen</option>
+                      <option value="Neutral">Neutral</option>
+                      <option value="Fröhlich">Fröhlich</option>
+                      <option value="Traurig">Traurig</option>
+                      <option value="Wütend">Wütend</option>
+                      <option value="Depressiv">Depressiv</option>
+                      <option value="Müde">Müde</option>
+                      <option value="Träge">Träge</option>
+                      <option value="Ausgelassen">Ausgelassen</option>
+                      <option value="Zynisch">Zynisch</option>
+                      <option value="Einsam">Einsam</option>
+                      <option value="Allein">Allein</option>
+                      <option value="Liebeskummer">Liebeskummer</option>
+                      <option value="Verliebt">Verliebt</option>
+                      <option value="Beobachtet">Beobachtet</option>
+                      <option value="Überfordert">Überfordert</option>
+                      <option value="Entspannt">Entspannt</option>
+                      <option value="Angst">Angst</option>
+                      <option value="Schüchtern">Schüchtern</option>
+                      <option value="Verfolgt">Verfolgt</option>
+                      <option value="Überrascht">Überrascht</option>
+                      <option value="Erschöpft">Erschöpft</option>
+                      <option value="Euphorisch">Euphorisch</option>
+                      <option value="Verwirrt">Verwirrt</option>
+                      <option value="Erleichtert">Erleichtert</option>
+                      <option value="Schuldig">Schuldig</option>
+                      <option value="Schockiert">Schockiert</option>
+                      <option value="Enttäuscht">Enttäuscht</option>
+                      <option value="Erstaunt">Erstaunt</option>
+                      <option value="Angespannt">Angespannt</option>
+                      <option value="Gelassen">Gelassen</option>
+                      <option value="Aufgeregt">Aufgeregt</option>
+                      <option value="Kummer">Kummer</option>
+                      <option value="Überwältigt">Überwältigt</option>
+                      <option value="Satt">Satt</option>
+                      <option value="Hungrig">Hungrig</option>
+                      <option value="Durstig">Durstig</option>
+                      <option value="Erfrischt">Erfrischt</option>
+                      <option value="Erfüllt">Erfüllt</option>
+                      <option value="Unmotiviert">Unmotiviert</option>
+                    </select>
+                  </div>
+                  <input type="text" name="q" class="form-control mb-3"
+                    placeholder="Person, Datum, Datei oder Stichwort">
+                  <button class="btn btn-secondary w-100">Suchen</button>
+                </form>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Card 3: Orga-Box -->
+        <!--
+          ORGA-BOX: Struktur
+          - Die Orga-Box ist in logische Gruppen unterteilt (Urlaubsverwaltung, Kalender, Aufgaben & Counter, Löschoptionen)
+          - Jede Gruppe hat eine eigene Überschrift (h5/h6) für Übersicht
+          - Bootstrap-Komponenten wie Collapse, Card, Button werden verwendet
+          - Formulare sind mit POST/GET und passenden Actions versehen
+          - Tipp: Mit STRG+F nach "Gruppe:" suchen, um die Abschnitte zu finden
+        -->
+        <div class="col-md-4">
+          <div class="card shadow-sm hover-card h-100" style="border-radius: 12px; overflow: hidden;">
+            <div class="card-header bg-info text-white text-center" style="border-radius: 12px 12px 0 0;">
+              <button class="btn btn-light btn-lg w-100 collapsed" data-bs-toggle="collapse"
+                data-bs-target="#listCardContent" aria-expanded="false" aria-controls="listCardContent">
+                📄 Orga-Box
+              </button>
+            </div>
+            <div id="listCardContent" class="collapse">
+              <div class="card-body">
+
+
+                <!-- Gruppe: Urlaubsverwaltung -->
+                <div class="mb-3">
+                  <button class="btn btn-outline-primary w-100" type="button" data-bs-toggle="collapse"
+                    data-bs-target="#urlaubCollapse" aria-expanded="false" aria-controls="urlaubCollapse">
+                    ⚙️ Urlaubsverwaltung ein-/ausklappen
+                  </button>
+                  <div class="collapse mt-3" id="urlaubCollapse">
+                    <h5 class="text-center mb-3">⚙️ Urlaubsverwaltung</h5>
+                    <!-- Urlaubstage verwalten -->
+                    <form method="POST" action="{{ url_for('update_vacation_settings') }}" class="mb-3">
+                      <div class="mb-2">
+                        <label class="form-label">Gesamt-Urlaubstage (Jahr)</label>
+                        <input type="number" name="total_vac_days" class="form-control"
+                          value="{{ current_user.total_vac_days or 30 }}" min="1" max="60" required>
+                      </div>
+                      <button type="submit" class="btn btn-outline-primary w-100">💾 Speichern</button>
+                    </form>
+                    <!-- Rest-Urlaubstage -->
+                    <h6 class="text-center mb-3">Rest-Urlaubstage</h6>
+                    {% set total_vac_days = current_user.total_vac_days or 30 %}
+                    {% set rest_vac = total_vac_days - used_vac_days %}
+                    <div class="mb-2">
+                      <span><i class="bi bi-umbrella"></i> Urlaubs-Bestand: <strong>{{ total_vac_days
+                          }}</strong></span><br>
+                      <span><i class="bi bi-clock-history"></i> Genommen: <strong>{{ used_vac_days
+                          }}</strong></span><br>
+                      <span><i class="bi bi-person-walking"></i> Rest: <strong>{{ rest_vac if rest_vac >= 0 else 0
+                          }}</strong></span>
+                    </div>
+                    <!-- Reale Arbeitstage -->
+                    <h6 class="text-center mb-3">📅 Reale Arbeitstage-Berechnung</h6>
+                    <div>
+                      <span>Gesamttage: <strong>{{ working_days.total_days }}</strong></span><br>
+                      <span>abzg. Wochenenden: <strong>{{ working_days.weekends }}</strong></span><br>
+                      <span>abzg. Feiertage: <strong>{{ working_days.holidays }}</strong></span><br>
+                      <span>abzg. ggebuchter Urlaub: <strong>{{ used_vac_days }}</strong></span><br>
+                      <!-- Für die verbleibenden Urlaubstage: -->
+                      <span>Verfügbare Urlaubstage: <strong>{{ working_days.remaining_vac_days }}</strong></span><br>
+                      <span class="fw-bold">Tatsächliche Arbeitstage: <strong>{{ working_days.working_days
+                          }}</strong></span>
+                    </div>
+                    <!-- Optional: Details zu gebuchten Urlauben -->
+                    <h6 class="text-center mt-3">📅 Gebuchte Urlaube</h6>
+                    {% for task in tasks if task.category == 'Urlaub' %}
+                    <div class="card mb-2">
+                      <div class="card-body">
+                        <h6>{{ task.title }}</h6>
+                        <p>
+                          {{ task.start_date.strftime('%d.%m.%Y') }} - {{ task.end_date.strftime('%d.%m.%Y') }}<br>
+                          <small>
+                            {% set days = (task.end_date - task.start_date).days + 1 %}
+                            {% set workdays = namespace(count=0) %}
+                            {% for day in range(days) %}
+                            {% set current = task.start_date + timedelta(days=day) %}
+                            {% if current.weekday() < 5 and not is_holiday(current) %} {% set
+                              workdays.count=workdays.count + 1 %} {% endif %} {% endfor %} Angerechnete Tage: {{
+                              workdays.count }} </small>
+                        </p>
+                      </div>
+                    </div>
+                    {% endfor %}
+                  </div>
+                </div>
+
+                <!-- Einstellungs-Bereich -->
+                <div class="mb-3">
+                  <button class="btn btn-outline-secondary w-100" type="button" data-bs-toggle="collapse"
+                    data-bs-target="#settingsCollapse" aria-expanded="false" aria-controls="settingsCollapse">
+                    ⚙️ Einstellungen & Auswertungen ein-/ausklappen
+                  </button>
+                  <div class="collapse mt-3" id="settingsCollapse">
+                    <!-- Einstellungs-Überschrift -->
+                    <h5 class="text-center mb-3">⚙️ Einstellungen & Auswertungen</h5>
+
+                    <!-- User Profil Einstellungen -->
+                    <div class="card mb-3">
+                      <div class="card-body">
+                        <h5 class="card-title text-center mb-3">👤 Profil</h5>
+
+                        <!-- Profilinformationen -->
+                        <div class="mb-3">
+                          <h6>Account-Daten</h6>
+                          <p>
+                            <strong>Benutzername:</strong> {{ current_user.username }}<br>
+                            <strong>Registriert seit:</strong> {{ current_user.created_at.strftime('%d.%m.%Y') if
+                            current_user.created_at else 'N/A' }}
+                          </p>
+                          <a href="/profile" class="btn btn-outline-primary w-100">Profil bearbeiten</a>
+                        </div>
+
+                        <!-- Style-Auswahl -->
+                        <form method="POST" action="{{ url_for('update_style') }}" id="themeForm" class="mb-3">
+                          <div class="mb-2">
+                            <label class="form-label">Design-Modus</label>
+                            <div class="form-check form-switch">
+                              <input class="form-check-input" type="checkbox" name="dark_mode" id="darkModeSwitch" {% if
+                                current_user.selected_theme=='dark' %}checked{% endif %}
+                                onchange="document.getElementById('themeForm').submit()">
+                              <label class="form-check-label" for="darkModeSwitch">
+                                <span id="themeLabel">
+                                  {% if current_user.selected_theme == 'dark' %}
+                                  🌙 Dark Mode aktiv
+                                  {% else %}
+                                  ☀️ Light Mode aktiv
+                                  {% endif %}
+                                </span>
+                              </label>
+                            </div>
+                          </div>
+                          <input type="hidden" name="redirect_to" value="{{ request.path }}">
+                          <button type="submit" class="btn btn-outline-primary w-100">💾 Design speichern</button>
+                        </form>
+
+                        <!-- Passwort-Formular -->
+                        <form method="POST" action="/settings/change_password" class="mb-3">
+                          <div class="mb-2">
+                            <label class="form-label">Neues Passwort setzen</label>
+                            <input type="text" name="password" class="form-control mb-1" placeholder="1234" required>
+                            <small class="text-muted">Bitte aufschreiben!</small>
+                          </div>
+                          <button type="submit" class="btn btn-outline-primary w-100">Passwort aktualisieren</button>
+                        </form>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+
+                <hr>
+                <!-- Gruppe: Filtern -->
+                <div class="mb-3">
+                  <button class="btn btn-outline-dark w-100" type="button" data-bs-toggle="collapse"
+                    data-bs-target="#kalenderCollapse" aria-expanded="false" aria-controls="kalenderCollapse">
+                    📅 Filterung ein-/ausklappen
+                  </button>
+                  <div class="collapse mt-3" id="kalenderCollapse">
+                    <h5 class="text-center mb-3">📅 Kalender-Filter</h5>
+                    <div class="mb-3">
+                      <label for="orgaSearchInput" class="form-label">🔍 nach Stichwort</label>
+                      <input type="text" id="orgaSearchInput" class="form-control"
+                        placeholder="Titel, Inhalt, Person ...">
+                    </div>
+                    <div class="mb-3">
+                      <label for="orgaMoodSelect" class="form-label">😶 nach Stimmung</label>
+                      <select id="orgaMoodSelect" class="form-select">
+                        <option value="">Alle Stimmungen</option>
+                        <option value="Neutral">Neutral</option>
+                        <option value="Fröhlich">Fröhlich</option>
+                        <option value="Traurig">Traurig</option>
+                        <option value="Wütend">Wütend</option>
+                        <option value="Depressiv">Depressiv</option>
+                        <option value="Müde">Müde</option>
+                        <option value="Träge">Träge</option>
+                        <option value="Ausgelassen">Ausgelassen</option>
+                        <option value="Zynisch">Zynisch</option>
+                        <option value="Einsam">Einsam</option>
+                        <option value="Allein">Allein</option>
+                        <option value="Liebeskummer">Liebeskummer</option>
+                        <option value="Verliebt">Verliebt</option>
+                        <option value="Beobachtet">Beobachtet</option>
+                        <option value="Überfordert">Überfordert</option>
+                        <option value="Entspannt">Entspannt</option>
+                        <option value="Angst">Angst</option>
+                        <option value="Schüchtern">Schüchtern</option>
+                        <option value="Verfolgt">Verfolgt</option>
+                        <option value="Überrascht">Überrascht</option>
+                        <option value="Erschöpft">Erschöpft</option>
+                        <option value="Euphorisch">Euphorisch</option>
+                        <option value="Verwirrt">Verwirrt</option>
+                        <option value="Erleichtert">Erleichtert</option>
+                        <option value="Schuldig">Schuldig</option>
+                        <option value="Schockiert">Schockiert</option>
+                        <option value="Enttäuscht">Enttäuscht</option>
+                        <option value="Erstaunt">Erstaunt</option>
+                        <option value="Angespannt">Angespannt</option>
+                        <option value="Gelassen">Gelassen</option>
+                        <option value="Aufgeregt">Aufgeregt</option>
+                        <option value="Kummer">Kummer</option>
+                        <option value="Überwältigt">Überwältigt</option>
+                        <option value="Satt">Satt</option>
+                        <option value="Hungrig">Hungrig</option>
+                        <option value="Durstig">Durstig</option>
+                        <option value="Erfrischt">Erfrischt</option>
+                        <option value="Erfüllt">Erfüllt</option>
+                        <option value="Unmotiviert">Unmotiviert</option>
+                      </select>
+                    </div>
+                    <div class="mb-3">
+                      <label for="orgaCategorySelect" class="form-label">📂 nach Kategorie</label>
+                      <select id="orgaCategorySelect" class="form-select">
+                        <option value="">Alle Kategorien</option>
+                        <option value="Finanzen">Finanzen</option>
+                        <option value="Reisen">Reisen</option>
+                        <option value="Hobbys">Hobbys</option>
+                        <option value="Familie">Familie</option>
+                        <option value="Freunde">Freunde</option>
+                        <option value="Beziehungen">Beziehungen</option>
+                        <option value="Selbstentwicklung">Selbstentwicklung</option>
+                        <option value="Spiritualität">Spiritualität</option>
+                        <option value="Gesellschaft">Gesellschaft</option>
+                        <option value="Politik">Politik</option>
+                        <option value="Kreativität">Kreativität</option>
+                        <option value="Schule/Bildung">Schule/Bildung</option>
+                        <option value="Technologie">Technologie</option>
+                        <option value="Umwelt">Umwelt</option>
+                        <option value="Ereignis">Ereignis</option>
+                        <option value="Ernährung">Ernährung</option>
+                        <option value="Sport">Sport</option>
+                        <option value="Kunst">Kunst</option>
+                        <option value="Musik">Musik</option>
+                        <option value="Literatur">Literatur</option>
+                        <option value="Film">Film</option>
+                        <option value="Spiele">Spiele</option>
+                        <option value="Natur">Natur</option>
+                        <option value="Wissenschaft">Wissenschaft</option>
+                        <option value="Philosophie">Philosophie</option>
+                        <option value="Geschichte">Geschichte</option>
+                        <option value="Kultur">Kultur</option>
+                        <option value="Recht">Recht</option>
+                        <option value="Soziales">Soziales</option>
+                        <option value="Ethische Fragen">Ethische Fragen</option>
+                        <option value="Sonstiges">Sonstiges</option>
+                        <option value="Mentale Gesundheit">Mentale Gesundheit</option>
+                      </select>
+                    </div>
+                    <!-- nach Datum filtern -->
+                    <div class="mb-3">
+                      <label for="orgaStartDate" class="form-label">📅 Von Datum</label>
+                      <input type="date" id="orgaStartDate" class="form-control" placeholder="Startdatum">
+                    </div>
+                    <div class="mb-3">
+                      <label for="orgaEndDate" class="form-label">📅 Bis Datum</label>
+                      <input type="date" id="orgaEndDate" class="form-control" placeholder="Enddatum">
+                    </div>
+                    <!-- Task-Arten filtern -->
+                    <h6 class="text-center mb-3">🔎 Task-Arten filtern</h6>
+                    <form method="GET" action="/dashboard">
+                      <div class="row mb-2">
+                        {% for t in ['Schulungen','Arbeit','Hobbys','Urlaub','Projekt','Ausbildung'] %}
+                        <div class="col-6 col-md-4">
+                          <div class="form-check">
+                            <input class="form-check-input" type="checkbox" name="task_types" value="{{ t }}"
+                              id="chk_{{ t }}" checked>
+                            <label class="form-check-label" for="chk_{{ t }}">{{ t }}</label>
+                          </div>
+                        </div>
+                        {% endfor %}
+                      </div>
+                      <div class="mb-3">
+                        <label class="form-label">Ergebnisse</label>
+                        <ul id="orgaResultsList" class="list-group">
+                          <!-- Dynamisch per JS -->
+                        </ul>
+                        <div class="d-flex gap-2 mt-3">
+                          <button id="orgaExportPdfBtn" class="btn btn-outline-dark flex-fill" type="button">
+                            📄 Export als PDF
+                          </button>
+                          <button id="orgaExportCsvBtn" class="btn btn-outline-dark flex-fill" type="button">
+                            📊 Export als CSV
+                          </button>
+                          <button id="orgaPrintBtn" class="btn btn-outline-secondary flex-fill" type="button">
+                            🖨️ Drucken
+                          </button>
+                          <button id="orgaDeleteFilteredBtn" class="btn btn-outline-danger flex-fill" type="button">
+                            🗑️ Gefilterte löschen
+                          </button>
+                        </div>
+                      </div>
+                  </div>
+                </div>
+                <hr>
+                <!-- Gruppe: Tasks & Counter -->
+                <div class="mb-3">
+                  <button class="btn btn-outline-secondary w-100" type="button" data-bs-toggle="collapse"
+                    data-bs-target="#tasksCollapse" aria-expanded="false" aria-controls="tasksCollapse">
+                    🗂️ Aufgaben & Counter ein-/ausklappen
+                  </button>
+                  <div class="collapse mt-3" id="tasksCollapse">
+                    <h5 class="text-center mb-3">🗂️ Aufgaben & Counter</h5>
+
+                    <button type="submit" class="btn btn-outline-secondary w-100">� Anzeigen</button>
+                    </form>
+                    <!-- Persönlicher Downcounter -->
+                    <div class="mt-3">
+                      <h6 class="text-center mb-3">⏳ Persönliche Downcounter (max. 4)</h6>
+                      <form method="POST" action="/settings/counter">
+                        <div class="row mb-2">
+                          {% for counter in all_counters %}
+                          <div class="col-6">
+                            <div class="form-check">
+                              <input class="form-check-input" type="checkbox" name="downcounters"
+                                value="{{ counter.id }}" id="dc{{ counter.id }}" {% if counter.id in user_counters
+                                %}checked{% endif %}>
+                              <label class="form-check-label" for="dc{{ counter.id }}">{{ counter.name }}</label>
+                            </div>
+                          </div>
+                          {% endfor %}
+                        </div>
+                        <small class="text-muted">Maximal 4 aktiv wählen</small>
+                        <button type="submit" class="btn btn-counter-blue w-100 mt-2">💾 Counter speichern</button>
+                      </form>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Kalender-Ansicht -->
+        <div class="row gx-0 mt-4">
+          <div class="col-12">
+            <div class="card calendar-card h-100 shadow-sm"
+              style="border-radius: 12px; overflow: hidden; background: #d1d3db;">
+              <div class="card-header" style="border-radius: 12px 12px 0 0;">
+                <button class="btn btn-link text-decoration-none collapsed" data-bs-toggle="collapse"
+                  data-bs-target="#calendarCard" aria-expanded="false" id="calendarToggleBtn">
+                  🗓️ Einträge im Kalender anzeigen/ausblenden
+                </button>
+              </div>
+              <div id="calendarCard" class="collapse">
+                <div class="card-body" style="font-family: 'Caveat', cursive;">
+                  <div id="calendar"></div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <footer class="footer"
+          style="margin-top: 4rem; background: transparent; border: none; border-radius: 0 0 18px 18px; box-shadow: none; padding: 0.3rem 0;">
+          <div class="container text-center">
+            <span class="text-muted" style="font-size: 1.1rem;">© 2025 MoppDiary &ndash; Projektteam <span
+                style="color: #e25555;">♥</span> Katja, Mirko, Najat</span>
+          </div>
+        </footer>
+        <script src="{{ url_for('static', filename='main.js') }}"></script>
+</body>
+
+</html>
