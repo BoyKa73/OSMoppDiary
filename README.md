@@ -1,6 +1,6 @@
 # MoppDiary
 
-MoppDiary ist eine moderne Tagebuch- und Organisations-App für Einzelpersonen. Sie kombiniert Kalender, Aufgabenverwaltung, Urlaubsplanung, Datei-Uploads und motivierende Zitate in einer intuitiven Weboberfläche.
+MoppDiary ist eine moderne Tagebuch- und Organisations-App für Einzelpersonen. Sie kombiniert Kalender, Aufgabenverwaltung, Urlaubsplanung, Datei-Anhänge und motivierende Zitate in einer intuitiven Weboberfläche.
 
 ## Features
 
