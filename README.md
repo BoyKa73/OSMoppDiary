@@ -39,7 +39,7 @@ MoppDiaryOS ist eine moderne Tagebuch- und Organisations-App für Einzelpersonen
 │   ├── style.css
 │   ├── main.js
 │   └── ...
-├── instance/
+├── instance/             # Ordner wird generiert wenn man installiert, wenn man die DB anlegt oder Dateianhänge erstellt
 │   ├── diary.db          # SQLite-Datenbank
 │   └── uploads/          # Datei-Uploads
 ├── migrations/           # Alembic-Migrationen

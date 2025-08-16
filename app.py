@@ -215,6 +215,7 @@ def register():
 # Zeigt das Login-Formular und prüft die Zugangsdaten.
 # Bei Erfolg wird der User eingeloggt und zur Startseite weitergeleitet.
 ###############################################################
+@app.route("/login", methods=["GET", "POST"])
 def login():
     if request.method == "POST":
         username = request.form["username"]
@@ -222,10 +223,10 @@ def login():
         user = User.query.filter_by(username=username).first()
         if user and check_password_hash(user.password, password):
             login_user(user)
-            flash(f"Willkommen, {user.username}! Deine Erinnerungen warten schon.", "success")
+            flash(f"Login erfolgreich!", "success")
             return redirect(url_for("index"))
         else:
-            flash("Der Zugang blieb verwehrt. Prüfe deine Daten und versuche es erneut!", "danger")
+            flash("Der Zugang blieb verwehrt. Prüfe Benutzername und Passwort und versuche es erneut!", "danger")
     return render_template("login.html")
 
 ###############################################################
@@ -1148,8 +1149,6 @@ def search():
 # Startet die Flask-App im Debug-Modus.
 ###############################################################
 if __name__ == '__main__':
-    # with app.app_context():
-    #     db.create_all()
     app.run(debug=True)
 
 
