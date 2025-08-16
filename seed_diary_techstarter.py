@@ -1,4 +1,6 @@
 """
+ACHTUNG: NUR EINMAL AUSFÜHREN!!!
+
 Zentrales Seeding-Skript für alle Tabellen: User, Task, StaticEvent, Quote, Attachment
 Führe dieses Skript im Flask-Shell-Kontext oder als separates Python-Skript aus.
 """
@@ -149,6 +151,9 @@ def seed_attachments():
 
 # --- Zentrale Seeding-Funktion ---
 def seed_all():
+    # Techstarter Edition
+
+
     # nur wenn man Testuser Anna ausprobieren will, ihr Passwort: 1234
     # seed_users() 
 

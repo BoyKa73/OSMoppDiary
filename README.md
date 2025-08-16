@@ -4,7 +4,7 @@ MoppDiaryOS ist eine moderne Tagebuch- und Organisations-App für Einzelpersonen
 
 ## Features
 
-- **Benutzerverwaltung**: Registrierung, Login, Logout, Profilverwaltung
+- **Benutzerverwaltung**: Registrierung, Login, Logout, Profilverwaltung, mehrere Profile möglich
 - **Kalender & Aufgaben**: Einträge mit Titel, Zeitraum, Kategorie, Stimmung, Farbe, Beteiligte Personen
 - **Urlaubsverwaltung**: Urlaubstage berechnen, buchen, Resturlaub anzeigen, Feiertage berücksichtigen
 - **Datei-Uploads**: Anhänge zu Aufgaben (Bilder, PDFs, Office-Dokumente, uvm.)
@@ -23,7 +23,7 @@ MoppDiaryOS ist eine moderne Tagebuch- und Organisations-App für Einzelpersonen
 - **Datenbank**: SQLite (diary.db), Modelle für User, Task, StaticEvent, Quote, Attachment
 - **Datei-Uploads**: Speicherung im Ordner `instance/uploads/`
 - **Migrationen**: Alembic für DB-Schema-Änderungen
-- **Umgebung**: .env für geheime Schlüssel
+- **Umgebung**: .env für geheimen Schlüssel (nicht verwechseln mit dem user profil passwort)
 
 ## Projektstruktur
 
@@ -53,7 +53,7 @@ MoppDiaryOS ist eine moderne Tagebuch- und Organisations-App für Einzelpersonen
    - Virtuelle Umgebung erstellen:
      ```bash
      python -m venv venv
-     source venv/bin/activate  # Windows: source venv/Scripts/activate
+     source venv/Scripts/activate # oder je nach OS: source venv/bin/activate
      ```
 2. **Abhängigkeiten installieren**
    ```bash
@@ -62,7 +62,7 @@ MoppDiaryOS ist eine moderne Tagebuch- und Organisations-App für Einzelpersonen
 3. **Datenbank initialisieren**
    ```bash
    flask db init
-   flask db migrate -m "Initial migration"
+   flask db migrate -m "Initial migration, create empty database"
    flask db upgrade
    ```
 4. **.env Datei anlegen**
@@ -77,9 +77,10 @@ MoppDiaryOS ist eine moderne Tagebuch- und Organisations-App für Einzelpersonen
    - Standardmäßig unter http://127.0.0.1:5000 erreichbar
 
 6. **Viel Spaß**
-   Du hast jetzt den Quellcode offen, deine eigene lokale DB, perfekt für dein Tagebuch!
+   Du hast jetzt den Quellcode offen, kannst ihn einsehen und verändern, deine eigene lokale DB, perfekt für dein Tagebuch!
 
-7. **Techstarter Edition**
+7. **Techstarter Edition aktivieren**
+   Termine rund um Techstarter und Feiertage:
    ```bash
    python seed_diary_techstarter.py
    ```
