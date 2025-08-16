@@ -500,7 +500,7 @@ def index():
                 )
                 db.session.add(new_event)
                 db.session.commit()
-                flash("Dein besonderer Tag wurde festgehalten – ein Lichtpunkt in deinem Kalender!", "success")
+                flash("Eintrag wurde gespeichert!", "success")
                 return redirect("/")
             except Exception as e:
                 db.session.rollback()
@@ -987,7 +987,7 @@ def edit_event(id):
 ###############################################################
 # Route: Task oder Event löschen
 #
-# Löscht den Eintrag aus der Datenbank (nur eigene Tasks).
+# Löscht den Eintrag aus der Datenbank Tasks oder StaticEvents
 ###############################################################
 @app.route('/delete/<id>', methods=['POST'])
 @login_required
@@ -1014,6 +1014,21 @@ def delete_entry(id):
     # Zugriffsschutz: Nur Besitzer darf Task löschen
     if obj_type == 'task' and entry.user_id != current_user.id:
         abort(403)
+    # Wenn es sich um einen Task handelt, lösche alle zugehörigen Attachments von der Festplatte
+    if obj_type == 'task':
+        attachments = Attachment.query.filter_by(task_id=entry.id).all()
+        for att in attachments:
+            file_path = os.path.join(app.config["UPLOAD_FOLDER"], att.filename)
+            try:
+                if os.path.exists(file_path):
+                    os.remove(file_path)
+                # Falls Ordner leer, entferne Ordner (optional)
+                folder = os.path.dirname(file_path)
+                if os.path.isdir(folder) and not os.listdir(folder):
+                    os.rmdir(folder)
+            except Exception as e:
+                print(f"Fehler beim Löschen des Anhangs: {e}")
+            db.session.delete(att)
     # StaticEvents können von jedem gelöscht werden, kein Zugriffsschutz nötig
     db.session.delete(entry)
     db.session.commit()
