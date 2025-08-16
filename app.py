@@ -170,7 +170,7 @@ def login():
         user = User.query.filter_by(username=username).first()
         if user and check_password_hash(user.password, password):
             login_user(user)
-            flash(f"Willkommen zurück, {user.username}! Deine Erinnerungen warten schon.", "success")
+            flash(f"Willkommen, {user.username}! Deine Erinnerungen warten schon.", "success")
             return redirect(url_for("index"))
         else:
             flash("Der Zugang blieb verwehrt. Prüfe deine Daten und versuche es erneut!", "danger")
