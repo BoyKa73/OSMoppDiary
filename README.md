@@ -1,6 +1,6 @@
-# MoppDiary
+# MoppDiaryOS Techstarter Edition
 
-MoppDiary ist eine moderne Tagebuch- und Organisations-App für Einzelpersonen. Sie kombiniert Kalender, Aufgabenverwaltung, Urlaubsplanung, Datei-Anhänge und motivierende Zitate in einer intuitiven Weboberfläche.
+MoppDiaryOS ist eine moderne Tagebuch- und Organisations-App für Einzelpersonen. Sie kombiniert Kalender, Aufgabenverwaltung, Urlaubsplanung, Datei-Anhänge und motivierende Zitate in einer intuitiven Weboberfläche.
 
 ## Features
 
@@ -79,6 +79,11 @@ MoppDiary ist eine moderne Tagebuch- und Organisations-App für Einzelpersonen. 
 6. **Viel Spaß**
    Du hast jetzt den Quellcode offen, deine eigene lokale DB, perfekt für dein Tagebuch!
 
+7. **Techstarter Edition**
+   ```bash
+   python seed_diary_techstarter.py
+   ```
+
 ## Nutzung
 
 - **Registrierung**: Über `/register` neuen Account anlegen
@@ -101,8 +106,11 @@ MoppDiary ist eine moderne Tagebuch- und Organisations-App für Einzelpersonen. 
 ## Sicherheit & Hinweise
 
 - Passwörter werden gehasht gespeichert (Werkzeug)
-- Datei-Uploads sind auf bestimmte Typen und Größe begrenzt (100 MB)
+- Datei-Anhänge sind auf bestimmte Typen und Größe begrenzt (100 MB)
 - Feiertage werden bei Urlaubsberechnung berücksichtigt
+- Einträge mit Kategorie Urlaub werden korrekt berücksichtigt
+- für pdf, csv, print bitte momentan über die Suche gehen, nicht über die orgabox
+- manches ist noch nicht implementiert aber es soll einen Blick auf die Zukunft geben oder zum Weiterentwickeln anregen
 
 ## Weiterentwicklung
 
@@ -122,7 +130,7 @@ MoppDiary ist eine moderne Tagebuch- und Organisations-App für Einzelpersonen. 
 Für Fragen, Feedback oder Beiträge: Bitte Issue im Repository eröffnen oder direkt Kontakt aufnehmen.
 
 ## Lizenz
-MIT License
+MoppDiaryOS Custom License, siehe LICENSE.txt
 
 ## Weiteres über die App und den Sinn dahinter
 

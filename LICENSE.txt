@@ -1,0 +1,9 @@
+MoppDiaryOS Custom License
+
+1. Die Software darf kostenlos genutzt und kopiert werden.
+2. Änderungen am Quellcode sind nur für den privaten Eigengebrauch gestattet. Die Weitergabe veränderter Versionen ist nicht erlaubt.
+3. Für Änderungswünsche oder Erweiterungen ist ein Issue im Repository zu eröffnen oder die Autoren direkt zu kontaktieren.
+4. Die kommerzielle Nutzung, Verbreitung und das Hosting der Software sind ausschließlich den ursprünglichen Autoren vorbehalten.
+5. Die Software wird ohne jegliche Garantie bereitgestellt. Die Autoren übernehmen keine Haftung für Schäden, die durch die Nutzung entstehen.
+
+© 2025 Katja, Mirko, Najat und Mitwirkende

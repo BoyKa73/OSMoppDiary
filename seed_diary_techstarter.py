@@ -62,9 +62,7 @@ def seed_staticevents():
         StaticEvent(title="🛠 Karriere-WorkShop 'LinkedIn'", start_date=datetime(2025, 7, 23, 9, 0), end_date=datetime(2025, 7, 23, 17, 0), color='#cf0df0', created_at=datetime(2025, 7, 1, 10, 0)),
         StaticEvent(title='🌴Techstarter-Frei', start_date=datetime(2025, 4, 17, 8, 0), end_date=datetime(2025, 4, 17, 18, 0), color='#e40c4f', created_at=datetime(2025, 4, 1, 9, 0)),
         StaticEvent(title='⚒ Tag der Arbeit-Feiertag', start_date=datetime(2025, 5, 1, 0, 0), end_date=datetime(2025, 5, 1, 23, 59), color='#e5c90c', created_at=datetime(2025, 4, 15, 8, 0)),
-        StaticEvent(title='🌉 Brückentag-Urlaub genommen', start_date=datetime(2025, 5, 2, 8, 0), end_date=datetime(2025, 5, 2, 18, 0), color='#8a0730', created_at=datetime(2025, 4, 20, 11, 0)),
         StaticEvent(title='🛫Christi Himmelfahrt-Feiertag', start_date=datetime(2025, 5, 29, 0, 0), end_date=datetime(2025, 5, 29, 23, 59), color='#e5c90c', created_at=datetime(2025, 5, 1, 12, 0)),
-        StaticEvent(title='🌉 Brückentag-Urlaub genommen', start_date=datetime(2025, 5, 30, 8, 0), end_date=datetime(2025, 5, 30, 18, 0), color='#8a0730', created_at=datetime(2025, 5, 10, 13, 0)),
         StaticEvent(title='🙏 Karfreitag', start_date=datetime(2025, 4, 18, 0, 0), end_date=datetime(2025, 4, 18, 23, 59), color='#e5c90c', created_at=datetime(2025, 3, 30, 14, 0)),
         StaticEvent(title='🙏 Ostern', start_date=datetime(2025, 4, 20, 0, 0), end_date=datetime(2025, 4, 22, 23, 59), color='#e5c90c', created_at=datetime(2025, 4, 5, 15, 0)),
         StaticEvent(title='🙏 Pfingsten', start_date=datetime(2025, 6, 8, 0, 0), end_date=datetime(2025, 6, 10, 23, 59), color='#e5c90c', created_at=datetime(2025, 5, 20, 16, 0)),
@@ -151,11 +149,22 @@ def seed_attachments():
 
 # --- Zentrale Seeding-Funktion ---
 def seed_all():
-    seed_users()
-    seed_tasks()
+    # nur wenn man Testuser Anna ausprobieren will, ihr Passwort: 1234
+    # seed_users() 
+
+    # Testdaten für Anna, Vorsicht ggf user_id anpassen:
+    # seed_tasks()
+
+    # Feiertage und Techstarter Termine:
     seed_staticevents()
+
+    # Zitate:
     seed_quotes()
+
+    # braucht man nicht momentan: 
     # seed_attachments() braucht man nicht
+
+
     print("Alle Tabellen wurden erfolgreich geseedet.")
 
 if __name__ == "__main__":
