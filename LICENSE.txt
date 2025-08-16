@@ -6,4 +6,7 @@ MoppDiaryOS Custom License
 4. Die kommerzielle Nutzung, Verbreitung und das Hosting der Software sind ausschließlich den ursprünglichen Autoren vorbehalten.
 5. Die Software wird ohne jegliche Garantie bereitgestellt. Die Autoren übernehmen keine Haftung für Schäden, die durch die Nutzung entstehen.
 
+# Die Hintergrundbilder (JPG/PNG) stammen von https://texturelabs.org/ und sind laut Anbieter frei verwendbar.
+# Sie werden in dieser App als visuelle Gestaltungselemente genutzt.
+
 © 2025 Katja, Mirko, Najat und Mitwirkende

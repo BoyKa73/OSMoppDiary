@@ -126,6 +126,7 @@ MoppDiaryOS ist eine moderne Tagebuch- und Organisations-App für Einzelpersonen
 - Projektteam: Katja, Mirko, Najat
 - Icons: [icon-icons.com](https://icon-icons.com/)
 - Fonts: Google Fonts (Caveat)
+- Hintergrundbilder: [texturelabs.org](https://texturelabs.org/) (frei verwendbar)
 
 ---
 
