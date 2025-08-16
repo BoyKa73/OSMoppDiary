@@ -112,11 +112,12 @@ MoppDiaryOS ist eine moderne Tagebuch- und Organisations-App für Einzelpersonen
 - Einträge mit Kategorie Urlaub werden korrekt berücksichtigt
 - für pdf, csv, print bitte momentan über die Suche gehen, nicht über die orgabox
 - StaticEvent oder all-day event genannt, sind fixe Termine die ganztägig sind, Task oder normaler Eintrag wird stundenweise angezeigt
-- manches ist noch nicht implementiert aber es soll einen Blick auf die Zukunft geben oder zum Weiterentwickeln anregen
+- manches ist noch nicht implementiert aber es soll einen Blick auf die Zukunft geben oder zum selber Weiterentwickeln anregen
+- im dark mode sieht man momentan nicht bei Neuer Eintrag all-day welche Felder inaktiv sind
 
 ## Weiterentwicklung
 
-- API-Endpunkte für externe Nutzung
+- Implementierung der hier angeteasten Features
 - Mobile App (optional)
 - Mehrsprachigkeit (DE/EN/FR)
 - Erweiterte Exportformate
