@@ -1,3 +1,13 @@
+
+#   Willkommen bei MoppDiaryOS – Techstarter Edition!
+#
+#   🚀 Entdecke, wie ein Tagebuch digital funktioniert.
+#   👀 Tipp: Lies die Kommentare, sie verraten dir die Logik!
+#   ✨ Challenge: Finde die Stelle, wo ein Eintrag gespeichert wird.
+#   💡 Du kannst alles anpassen – probier es aus!
+#   📚 Mehr Infos im README.md
+
+
 # --- Imports und Setup ---
 # Flask: Web-Framework, render_template für das serverseitige rendern von html templates
 from flask import Flask, render_template, request, redirect, flash, url_for, send_from_directory, abort, make_response
@@ -31,7 +41,12 @@ import os
 load_dotenv()
 
 
-# --- Flask App & Konfiguration ---
+###############################################################
+# Flask App & Konfiguration
+#
+# Hier wird die Flask-App erstellt und konfiguriert.
+# Die Datenbank, Upload-Ordner und geheime Schlüssel werden festgelegt.
+###############################################################
 app = Flask(__name__, static_folder='static')
 app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///diary.db'  # SQLite DB
 app.config['SECRET_KEY'] = os.getenv('SECRET_KEY', 'fallback-secret')  # Aus .env oder Fallback
@@ -39,11 +54,21 @@ app.config['UPLOAD_FOLDER'] = os.path.join(app.instance_path, 'uploads')
 app.config['MAX_CONTENT_LENGTH'] = 100 * 1024 * 1024 # max 100 MB Gesamtgröße der Anhänge bei einem Upload-Vorgang
 ALLOWED_EXTENSIONS = {"png", "jpg", "jpeg", "gif", "pdf", "png", "gif", "txt", "odf", "ods", "doc", "docx"}
 
-# --- DB & Migration initialisieren ---
+###############################################################
+# DB & Migration initialisieren
+#
+# Initialisiert die Datenbank und das Migrationstool (Alembic).
+# Damit kannst du später das Datenbankschema ändern und migrieren.
+###############################################################
 db.init_app(app)
 migrate = Migrate(app, db)
 
-# --- Flask-Login initialisieren ---
+###############################################################
+# Flask-Login initialisieren
+#
+# Ermöglicht Login, Logout und Session-Handling für User.
+# Die Funktion load_user lädt den User aus der Datenbank anhand der Session-ID.
+###############################################################
 # Die Login-Route (login_user(user)) speichert nur die User-ID in der Session.
 # Bei jedem neuen Request ruft Flask-Login automatisch load_user mit dieser ID auf, um das User-Objekt aus der Datenbank zu laden.
 # So ist current_user immer korrekt gesetzt und du hast Zugriff auf alle User-Daten.
@@ -54,7 +79,12 @@ login_manager.login_view = "login"  # Rücksprung für nicht eingeloggte User
 def load_user(user_id):
     return db.session.get(User, int(user_id))
 
-# --- Zufälligen Quote aus der DB holen ---
+###############################################################
+# Zufälligen Quote aus der DB holen
+#
+# Gibt ein zufälliges Zitat aus der Datenbank zurück.
+# Wird z.B. im Dashboard angezeigt.
+###############################################################
 def get_daily_quote():
     quotes = Quote.query.all()
     if quotes:
@@ -63,17 +93,25 @@ def get_daily_quote():
     else:
         return "Kein Zitat gefunden."
 
-# nur bestimmte Dateien erlauben
+###############################################################
+# Dateiupload: nur bestimmte Dateitypen erlauben
+###############################################################
 def allowed_file(filename):
     return '.' in filename and filename.rsplit('.', 1)[1].lower() in ALLOWED_EXTENSIONS
 
-# --- Feiertags-Cache Berechnung Deutschland ---
+###############################################################
+# Feiertags-Cache Berechnung Deutschland
+#
+# Prüft, ob ein Datum ein Feiertag ist (bundesweit, teils manuell ergänzt).
+###############################################################
 @lru_cache(maxsize=None)
 def is_holiday(date_obj):
     year = date_obj.year
     return date_obj.strftime('%Y-%m-%d') in GERMAN_HOLIDAYS.get(year, [])
 
-#  Arbeitstage definieren
+###############################################################
+# Arbeitstage definieren und Feiertage für mehrere Jahre
+###############################################################
 WORKING_DAYS = {0, 1, 2, 3, 4}  # Montag bis Freitag
 # Deutsche Feiertage 2025 (bundesweit)
 GERMAN_HOLIDAYS = {
@@ -131,7 +169,11 @@ GERMAN_HOLIDAYS = {
 
     }
 
-# Hilfsfunktion Arbeitstage berechnen
+###############################################################
+# Hilfsfunktion: Arbeitstage zwischen zwei Daten berechnen
+#
+# Zählt alle Werktage (Mo-Fr), die keine Feiertage sind.
+###############################################################
 def calculate_workdays_between(start_date, end_date):
     """Berechnet Arbeitstage zwischen zwei Daten (ohne Wochenenden und Feiertage)"""
     workdays = 0
@@ -143,7 +185,12 @@ def calculate_workdays_between(start_date, end_date):
         current += timedelta(days=1)
     return workdays
 
-@app.route("/register", methods=["GET", "POST"])
+###############################################################
+# Registrierung eines neuen Users
+#
+# Zeigt das Registrierungsformular und legt bei POST einen neuen User an.
+# Prüft, ob der Name schon existiert und ob die Felder ausgefüllt sind.
+###############################################################
 def register():
     if request.method == "POST":
         username = request.form["username"].strip()
@@ -162,7 +209,12 @@ def register():
         return redirect(url_for("login"))
     return render_template("register.html")
 
-@app.route("/login", methods=["GET", "POST"])
+###############################################################
+# Login eines Users
+#
+# Zeigt das Login-Formular und prüft die Zugangsdaten.
+# Bei Erfolg wird der User eingeloggt und zur Startseite weitergeleitet.
+###############################################################
 def login():
     if request.method == "POST":
         username = request.form["username"]
@@ -176,7 +228,11 @@ def login():
             flash("Der Zugang blieb verwehrt. Prüfe deine Daten und versuche es erneut!", "danger")
     return render_template("login.html")
 
-# --- Route zum Ändern des Benutzernamens ---
+###############################################################
+# Route: Benutzernamen ändern
+#
+# User kann seinen Namen ändern, wenn er noch nicht vergeben ist.
+###############################################################
 @app.route('/settings/change_username', methods=['POST'])
 @login_required
 def change_username():
@@ -247,7 +303,12 @@ def update_profile_settings():
     # Allgemeine Profileinstellungen
     pass
 
-# --- Route zum Hinzufügen eines neuen Urlaubstasks ---
+###############################################################
+# Route: Urlaub eintragen
+#
+# Berechnet die Arbeitstage im gewünschten Zeitraum und prüft, ob genug Urlaubstage übrig sind.
+# Legt einen neuen Urlaubseintrag an.
+###############################################################
 @app.route('/add_vacation', methods=['POST'])
 @login_required
 def add_vacation():
@@ -313,7 +374,11 @@ def update_vacation_settings():
     return redirect(url_for('index'))
 
 
-# --- Route zum Berechnen der genutzten Urlaubstage ---
+###############################################################
+# Hilfsfunktion: Genutzte Urlaubstage berechnen
+#
+# Zählt alle Urlaubstage des Users im aktuellen Jahr.
+###############################################################
 def calculate_used_vacation_days(user_id):
     """Berechnet die bereits verbrauchten Urlaubstage für den aktuellen Benutzer im laufenden Jahr"""
     current_year = datetime.now().year
@@ -380,7 +445,13 @@ def calculate_working_days_until(target_date):
     
     return working_days
 
-# --- Hauptseite: Einträge anzeigen und neue Einträge anlegen ---
+###############################################################
+# Hauptseite: Einträge anzeigen und neue Einträge anlegen
+#
+# Zeigt alle Einträge des Users und berechnet Statistiken (Arbeitstage, Urlaub, Events).
+# Bei POST wird ein neuer Eintrag oder Event angelegt.
+# Anhänge werden verarbeitet und gespeichert.
+###############################################################
 @app.route("/", methods=["GET", "POST"])
 @login_required
 def index():
@@ -568,7 +639,11 @@ def index():
                         is_holiday=is_holiday)
 
 
-# --- Route für den Kalender mit Events ---
+###############################################################
+# Route: Kalender mit Events
+#
+# Gibt alle Events und Tasks als JSON für den Kalender aus.
+###############################################################
 @app.route("/events")
 def get_events():
     events = []
@@ -605,7 +680,11 @@ def get_events():
         })
     return jsonify(events)
 
-# --- Route zum Aktualisieren Start/Ende per Resize aus FullCalendar ---
+###############################################################
+# Route: Start/Ende von Events per Drag&Drop im Kalender ändern
+#
+# Aktualisiert die Datenbank, wenn ein Event im Kalender verschoben wird.
+###############################################################
 @app.route("/resize/<id>", methods=["POST"])
 @login_required
 def resize(id):
@@ -668,13 +747,17 @@ def resize(id):
     logging.warning("Ungültiges Format (kein JSON)")
     return "Ungültiges Format", 400
 
-# --- Route für den Adventskalender ---
+###############################################################
+# Route: Adventskalender anzeigen
+###############################################################
 @app.route('/adventskalender')
 @login_required
 def adventskalender():
     return render_template('adventskalender.html')
 
-# --- Route für die Einstellungen ---
+###############################################################
+# Route: Passwort ändern
+###############################################################
 @app.route('/settings/change_password', methods=['POST'])
 @login_required
 def change_password():
@@ -687,7 +770,9 @@ def change_password():
     flash('Passwort erfolgreich geändert!', 'success')
     return redirect(url_for('index'))
 
-# Hier können User ihre Einstellungen ändern, z.B. Urlaubstage, Geburtstage, Projekte, Schulungen, Feiertage
+###############################################################
+# Route: Urlaubstage im Profil ändern
+###############################################################
 @app.route('/settings/profile', methods=['POST'])
 @login_required
 def update_profile():
@@ -699,7 +784,11 @@ def update_profile():
         flash('Urlaubsdaten aktualisiert', 'success')
     return redirect(url_for('index'))
 
-# --- Route zum Aktualisieren des Stils (Dark Mode) ---
+###############################################################
+# Route: Dark Mode aktivieren/deaktivieren
+#
+# Speichert die Theme-Einstellung im User-Profil und als Cookie.
+###############################################################
 # Hier kann der User den Dark Mode aktivieren/deaktivieren
 @app.route('/settings/style', methods=['POST'])
 @login_required
@@ -730,7 +819,11 @@ def update_style():
         flash('Fehler beim Speichern der Einstellungen', 'error')
         return redirect(url_for('dashboard'))
 
-# --- Route zum Bearbeiten eines Tasks ---
+###############################################################
+# Route: Task oder Event bearbeiten
+#
+# Zeigt das Bearbeitungsformular und verarbeitet Änderungen inkl. Anhänge.
+###############################################################
 # Hiermit können User ihre Tasks bearbeiten, inklusive Anhänge
 # für das Modal 
 @app.route("/edit/<id>", methods=["GET", "POST"])
@@ -798,7 +891,9 @@ def edit(id):
             return redirect("/")
     return render_template("edit.html", task=obj)
 
-## --- Erweiterte Edit-Route für Tasks und StaticEvents (aus app2.py, als /edit_event/<id>) ---
+###############################################################
+# Erweiterte Edit-Route für Tasks und StaticEvents (Drag&Drop im Kalender)
+###############################################################
 @app.route("/edit_event/<id>", methods=["POST"])
 @login_required
 def edit_event(id):
@@ -888,7 +983,11 @@ def edit_event(id):
         logging.error(f"Fehler beim Update (Form): {e}")
         return f"Fehler: {e}", 400
 
-# --- Route zum Löschen eines Tasks ---
+###############################################################
+# Route: Task oder Event löschen
+#
+# Löscht den Eintrag aus der Datenbank (nur eigene Tasks).
+###############################################################
 @app.route('/delete/<id>', methods=['POST'])
 @login_required
 def delete_entry(id):
@@ -920,7 +1019,11 @@ def delete_entry(id):
     flash("Eintrag erfolgreich gelöscht.", "success")
     return redirect(url_for("index"))
         
-# --- Download-Route für Attachments aktivieren ---
+###############################################################
+# Route: Download von Anhängen
+#
+# Ermöglicht das Herunterladen von Anhängen, wenn der User berechtigt ist.
+###############################################################
 @app.route("/attachments/<int:task_id>/<path:filename>")
 @login_required
 def download_attachment(task_id, filename):
@@ -936,7 +1039,11 @@ def download_attachment(task_id, filename):
     directory = os.path.join(app.config["UPLOAD_FOLDER"], str(task_id))
     return send_from_directory(directory, filename, as_attachment=True)
 
-@app.route("/delete_attachment/<int:attachment_id>", methods=["POST"])
+###############################################################
+# Route: Anhang löschen
+#
+# Löscht einen Anhang und entfernt ggf. den leeren Ordner.
+###############################################################
 @login_required
 def delete_attachment(attachment_id):
     attachment = Attachment.query.get_or_404(attachment_id)
@@ -974,7 +1081,11 @@ def dashboard():
     )
     return render_template("dashboard.html", quote_of_the_day=quote_of_the_day, next_events=next_events)
 
-# --- Kontext-Processor für Zitat des Tages ---
+###############################################################
+# Kontext-Processor: Zitat des Tages
+#
+# Macht das Zitat in allen Templates verfügbar.
+###############################################################
 # Damit das Zitat in allen Templates verfügbar ist, ohne es explizit zu übergeben
 @app.context_processor
 def inject_quote():
@@ -1031,7 +1142,11 @@ def search():
     return render_template("search.html", tasks=unique_tasks, query=query, category=category, mood=mood)
 
 
-# --- App-Start ---
+###############################################################
+# App-Start
+#
+# Startet die Flask-App im Debug-Modus.
+###############################################################
 if __name__ == '__main__':
     # with app.app_context():
     #     db.create_all()
