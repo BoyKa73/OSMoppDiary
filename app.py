@@ -191,6 +191,7 @@ def calculate_workdays_between(start_date, end_date):
 # Zeigt das Registrierungsformular und legt bei POST einen neuen User an.
 # Prüft, ob der Name schon existiert und ob die Felder ausgefüllt sind.
 ###############################################################
+@app.route("/register", methods=["GET", "POST"])
 def register():
     if request.method == "POST":
         username = request.form["username"].strip()
