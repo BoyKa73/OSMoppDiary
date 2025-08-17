@@ -86,11 +86,24 @@ def load_user(user_id):
 # Wird z.B. im Dashboard angezeigt.
 ###############################################################
 def get_daily_quote():
+    # Hole alle Zitate aus der Datenbank
     quotes = Quote.query.all()
     if quotes:
+        # Erzeuge einen stabilen Seed aus dem aktuellen Datum
+        # Das Datum wird als String genommen, z.B. '2025-08-17'
+        today_str = datetime.now().strftime('%Y-%m-%d')
+        # Der Seed wird berechnet, indem die Unicode-Werte aller Zeichen des Datums aufsummiert werden
+        # Dadurch ist der Seed für jeden Tag unterschiedlich, aber für alle Nutzer gleich
+        seed = sum(ord(c) for c in today_str)
+        # Setze den Zufallszahlengenerator auf diesen Seed
+        # Das sorgt dafür, dass random.choice immer das gleiche Zitat für den Tag auswählt
+        random.seed(seed)
+        # Wähle ein zufälliges Zitat aus der Liste
         quote = random.choice(quotes)
+        # Gib den Inhalt des Zitats zurück
         return quote.content
     else:
+        # Falls keine Zitate vorhanden sind, gib einen Platzhaltertext zurück
         return "Kein Zitat gefunden."
 
 ###############################################################
