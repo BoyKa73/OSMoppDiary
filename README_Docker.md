@@ -26,4 +26,3 @@ Dockerfile angibst, und dem Port, den du im docker run -p Befehl verwendest?
 
 EXPOSE im Dockerfile deklariert, auf welchem Port die Anwendung im Container lauscht. Es ist eine Dokumentation und hat keine direkte Auswirkung auf die Netzwerkkonfiguration.
 Mit docker run -p <hostport>:<containerport> wird der Container-Port auf einen Port des Host-Rechners gemappt, sodass die App von außen erreichbar ist. EXPOSE ist optional, das Mapping im Run-Befehl ist entscheidend für die Erreichbarkeit.
-hm, was mir auffällt: ist die sqlite datenbank vom instance ordner schon mit drin, wird das seed schon ausgeführt?
