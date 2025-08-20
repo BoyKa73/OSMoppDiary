@@ -15,7 +15,7 @@ instance/uploads/
 # Umgebungsvariablen später nicht mitpushen, da womöglich lokal anders
 # .env
 
-migrations/
+# migrations/
 
 # VSCode-Ordner
 .vscode/
