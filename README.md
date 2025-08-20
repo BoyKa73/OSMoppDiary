@@ -61,8 +61,6 @@ MoppDiaryOS ist eine moderne Tagebuch- und Organisations-App für Einzelpersonen
    ```
 3. **Datenbank initialisieren**
    ```bash
-   flask db init
-   flask db migrate -m "Initial migration, create empty database"
    flask db upgrade
    ```
 4. **.env Datei anlegen**
